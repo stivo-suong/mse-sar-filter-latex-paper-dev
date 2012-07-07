@@ -1,0 +1,48 @@
+Overview
+	This folder contains Matlab code for the paper speckle filtering using homoskedastic effects of log transformation
+	Open ended question
+		For possible paper: pdf(x) estimation from pdf(y) and pdf(n)
+			how to tie this with homoskedastic effect? (it's additive effect here!)
+	Concepts and files
+		Makefile for use with vim (:make)
+			Makefile	(now only has bdd feature)
+			build.sh	bash script to go through all files and generate artifacts
+		Behavior driven development
+			bdd.m	Single Matlab code file!
+			bdd.sh	Run file (now use Makefile instead)
+		Other Matlab files (TODO: sort this out)
+			exit_cmd.m 
+				used to terminate matlab session
+			extract_window_data_from_file.m
+				library used in most matlab files (including generate files)
+			generate_scene1_log_intensity.m
+				generate data in scene 1 (homogenous sea water area)
+			generate_scene2_log_intensity.m
+				generate data in scene 2 (heterogenous urban area) original image has better contrast
+			generate_scene2_log_variance.m
+				generate log variance data of scene 2 
+				(4x4 not perfect but arguable, but hard if compare with original image)
+			plot_amplitude_hist_model_pdf_scene1.m
+			plot_intensity_hist_model_pdf_scene1.m
+			plot_log_amplitude_hist_model_pdf_scene1.m
+			plot_log_intensity_hist_model_pdf_scene1.m
+				plot real vs. function (match with simulation)
+			plot_log_intensity_contrast_hist_model_pdf_scene1.m
+				to show consistent sense of distance in log domain (pixel - left pixel)
+			plot_log_intensity_dispersion_hist_model_pdf_scene1.m
+				to show consistent sense of dispersion in log domain (pixel - average of whole scene 300x300)
+			failed_canny_edge_strength_on_log_intensity.m
+				canny edge detector also not working well in log domain because of noise!
+			plot_log_intensity_variance_hist_model_cdf_scene1.m
+				show match b/w simulation, analysis modelling and real data (for 2 samples)
+			plot_log_intensity_variance_no_of_samples_cdf.m
+				simulate for many samples calculate 
+			simulate_log_intensity_variance_cutoff_values.m
+				simulate cut-off value for many sample
+			verify_analytical_avg_var_in_log_transform.m
+				confirm mean variance of log transformed variables
+			verify_MSE_as_perf_index_in_log_transform.m				
+				confirm MSE can be used as perf index in log transformed domain
+			measure_edge_effects_on_filter_perf.m
+				measure the effects of a single edge on filter MSE perf in log domain
+

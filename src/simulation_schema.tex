@@ -1,0 +1,39 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{pst-eps}
+\begin{document}
+\pagestyle{empty}
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=8em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, text centered,text width=7em, 
+    minimum height=2em]
+\tikzstyle{dummy} = [draw, ellipse, text centered,text width=7em, 
+    minimum height=2em]
+
+\begin{TeXtoEPS}
+\begin{tikzpicture}[auto]
+    % Place nodes
+    \node [cloud] (gt) {$X$ \\ (ground-truth)};
+    \node [block, right of=gt, node distance = 16em] (system) {SAR \\ Processor};
+    \node [right of=system, node distance = 16em] (dummy1) {};
+    \node [cloud, below of=dummy1, node distance = 6em] (observed) {$\tilde{X}$ \\ (observed)};
+    \node [below of=observed, node distance = 6em] (dummy2) {};
+    \node [block, left of=dummy2, node distance = 16em] (filter) {SAR \\ Speckle Filter};
+    \node [cloud, left of=filter, node distance = 16em] (estimated) {$\hat{X}$ \\ (estimated)};
+    % Draw edges
+    \path [line] (gt) -- (system);
+    \path [line] (system) -| (observed);
+    \path [line] (observed) |- (filter);
+    \path [line] (filter) -- (estimated);
+\end{tikzpicture}
+\end{TeXtoEPS}    
+
+\end{document}

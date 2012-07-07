@@ -1,0 +1,997 @@
+%\documentclass[a4paper,10pt]{article}
+\documentclass[journal]{IEEEtran}
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}
+
+\usepackage{cite} %for citations
+
+ %this is for math typing (eg: cases)
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\usepackage{epsfig} %for figures
+
+%\usepackage[caption=false]{caption}%for captions
+\usepackage[caption=false,font=footnotesize]{subfig} %for subfigures
+
+%opening
+\title{ 
+	Using Mean-Squared-Error in Log-Transformed Domain to Evaluate Speckle Filters.
+}
+
+%\author{Thanh-Hai Le, Ian McLoughlin}
+\author{Thanh-Hai~Le,
+        Ian~McLoughlin,~\IEEEmembership{Senior Member,~IEEE}, 
+	Brian~Quang-Huy~Nguyen %
+	%Ken-Yoong~Lee, 
+	%and Timo~Brestchneider % <-this % stops a space
+\thanks{Thanh-Hai~Le, Brian~Quang-Huy~Nguyen and Ian~McLoughlin are with School of Computer Engineering, 
+Nanyang Technological University, Singapore,}% <-this % stops a space
+%\thanks{Ken-Yoong Lee and Timo Brestchneider are with EADS InnovationWorks Singapore.}% <-this % stops a space
+\thanks{Manuscript received ?, 2012; revised ?.}}
+
+\markboth{Transactions on Geoscience \& Remote Sensing,~Vol.~?, No.~?, April~2012}%
+{ Le \MakeLowercase{\textit{et al.}}: SLC SAR speckle filtering using Homoskedastic effects of Logarithmic Transfomation }
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+Logarithmic transformation has potential to convert heteroskedastic SAR data into homoskedastic data sets, so that the universal Gauss-Markov theorem becomes applicable. This suggests that the familiar mean squared error (MSE) could become a useful evaluation criteria for statistical estimators (i.e. speckle filters) when operating in the logarithmic transformed domain.
+In this paper, we show, through experiments and analysis, that the MSE criteria in the log-transformed domain can serve as a reliable performance indicator to evaluate performance of SAR speckle filters. Furthermore, we determine a mathematical relationship that, in homogeneous areas, links variance (and hence MSE) with the canonical Equivalent Number of Looks index.
+For heterogenous areas, the usual ratio-based radiometric preservation criteria is shown to be related to the standard estimator bias evaluation in the log-transformed domain. 
+Combined with the fact that variance is an effective measure of speckle suppression power, it is apparent that MSE can then serve as a usable performance criteria to evaluate feature preservation properties of SAR speckle filters.
+Through experiment, analysis, and discussion, we show that lower MSE suggests better feature detection and classication ability in filtered images, an important requirement for speckle filters.
+%, which can be visuallized using the standard Receiver Operating Curve (ROC) and quantified by measuring the Area Under this Curve (AUC).
+%correlates with higher Area Under the ROC curve (AUC), a metric frequently used to evaluate separability of target and clutter statistical populations in feature detection / classification scenarios.
+
+%Under the assumption of homogeneity, the sampling distribution of variance in log-transformed domain is constant and independent to the underlying back scattering coefficient. Then the observable sample variance in the log-transformed domain can be used as a measure of spatial non-homogeneity, thus statistical test on log-transformed variance can be formed to detect heterogeneity in a window of analysis. Using clustering algorithms, a novel speckle filtering algorithm is proposed to partition a non-homogenous area,  detected by the statistical test, into homogenous areas with estimated back scattering coefficient values.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Synthetic aperture radar, speckle-filtering, homoskedasticity, mean-squared-error
+\end{IEEEkeywords}
+
+%\textbf{Keywords: } Synthetic Aperture Radar, speckle-filtering, homoskedasticity
+
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+
+%SAR Speckle filter is an active area of research, 
+The nature of SAR speckle is that it is stochastic over homogenous areas and heteroskedastic heterogenously. 
+[IVM:what does this mean??]
+In the general case of SAR processing, statistical models are used to derive the underlying back-scattering coefficient ($\sigma$) from measured data. Then speckle filters are, by and large, estimators that attempt to determine the unknown coefficient from observable SAR data. 
+SAR speckle-filtering can be, and has been, positioned within the context of estimation theory\cite{Touzi_2002_TGRS}. This means that the stages in this statistical framework consist of statistical modelling, estimator development and evaluating of the performance of estimators. 
+
+Such estimators are typically evaluated based on the bias and variance properties of their estimates, with lower bias and variance indicating better performance [IVM: check this addition of mine is true??]. This evaluation is usually based qualitatively on some real data and quantitatively through simulated experiments. Also, due to the stochastic nature of the simulation process, statistical summaries of repeated simulating experiments are normally preferred to single-run results.
+
+%SAR speckle filters have been put within the statistical estimation framework (cite Touzi)
+A survey of SAR speckle filter research, however, indicates a different picture from the standard practice of the statistical framework, specifically in the stage of performance evaluation. Due to the multiplicative nature of speckle noise, bias and variance evaluation may not be the most useful measures. Also the heteroskedastic nature of the data causes the common mean-squared-error evaluation to be inapplicable without some adaptation. In fact, a survey of relevant literature fails to reveal a single universally agreed quantitative metric to evaluate speckle filters.
+
+The result of this is that each newly proposed speckle filter is likely to be published along with a new methodology of evaluating its own performance, and many papers lack any comparative basis beyond simple visual qualititave comparisions on a few image scenes. While such visual comparison is useful, as an evaluative methodology, it lacks objectivity. Other papers do present quantitative measurements, however the evaluation metrics used vary significantly from one paper to the next due to the lack of a standardized evaluation criteria.
+
+Despite this, there have been a few articles published which are dedicated to the topic of evaluating speckle filters through a universal evaluation crieria. In these papers, the evaluation metrics and simulation procedures receive much more thorough treatment, however several different metrics exist to cater to the variety of image classes.
+
+In this paper, we note that log-transformation convert multiplicative and heteroskedastic SAR data into a more familiar additive and homoskedastic domain and thus we propose the use of MSE in the log-transformed domain as a single unifying evaluation criteria across different scenarios.
+
+\subsection{Related Work in Literature}
+
+It is customary to devide the evaluation of speckle filters into two scenarios of homogeneous and heterogeneous areas.
+In homogeneous areas, where the underlying radiometry is assumed to be unchanged, the filters are expected to estimate with no radiometry bias. The best filters achieve maximum speckle suppression power in such areas.
+
+To evaluate estimation bias, the normal metric used is Radiometry Loss index 
+
+\begin{equation}
+R_{loss} = 10 log_{10} \left\{\frac{X_f}{E(X)} \right\}
+\end{equation}
+
+In the log-transformed domain, the equivalent index would, of course, be a simple substraction.
+Shi (1994) found that all of the standard filters (boxcar, Lee, Kuan, Frost, MAP) can achieve negligible bias. In this paper, we also observe that all of these standard filters can not only preserves the expected radiometric values, they also preserve a consistent sense of distance (which we will describe later) in the log-transformed domain.
+
+A few metrics have been used to evaluate speckle suppression power.
+The most common one is probably the Equivalent Number of Looks index 
+\begin{equation}
+ENL=avg(I)^2/var(I)
+\end{equation}
+
+that was proposed by Lee (cite).
+Another metric is the ratio of mean to standard deviation, $R=std(I)/avg(I)$ (cite Gagnon)
+%Lopes proposed the variation coefficient $C_v=var(I)/avg(I)$, which suppose to measure the scene's homogeneity (cite Lopes TGRS). 
+Since log-transformation converts multiplcative and heteroskedastic SAR data into additive and homoskedastic models, we suggest that the variance in the log-transformed domain can be used to evaluate the noise suppression power of speckle filters.
+
+In fact, Solbo used standard deviation in the log-transformed domain to measure homogeneity. Extending this, we will show that for homogeneous areas, ENL is related to this variance.
+
+However real-life and practical images are not homogeneous, and there are many proposed methods of evaluating speckle filters in such areas. It is here that the situation becomes less structured, and more `exciting' from a research perspective.
+%and it is here that things gets a lot more exciting and unstructured to evaluate speckle filters in heterogenous area.
+Under conditions of heterogeneity, even the standard speckle filters will introduce radiometric loss, normally at local or regional level.
+
+In fact the common consensus is that a powerful speckle suppresion filter (for example the boxcar filter) is likely to perform poorly in terms of preservating underlying radiometric differences (such as causing excessive blurring), and vice versa. One can relatively easily satisfy one of these criteria, but not easily satisfy both.
+
+So the first difficulty in evaluating speckle filters for heterogeneous scene is to find one or more bases for comparision. It is trivially easy to estimate the underlying radiometric co-efficient if an area is known to be homogeneous, it is however virtually impossible to do so without simulation or access to accurate ground-truth for real-life images.
+
+Without ground truth, one way to evaluate radiometric preservation of filters is to compute the ratio image, which is the ratio between the orignal speckled image and the filtered image (cite). Under a multiplicative model, the ratio images is expected to comprise the noise being removed, (i.e. it should be completely random). Being random, this should display as little ``visible'' structure as possible. Also its histogram and PDF are expected to match the noise characteristics in the original image as closely as possible.
+When displaying such images, ratios that are smaller than unity are much harder to distinguish than those that are bigger (cite Merdios), meaning that a purely visual analysis may be insufficient.
+
+We therefore propose to adopt a log-transformed domain approach where multiplicative noise then resembles the familiar additive model.
+The ratio image then becomes a simple substraction image.
+The evaluation methodology for such a proposal does not differ, but now the residual image is additive and linear and thus more natural to display and view.
+
+Another way to evaluate speckle filters is by assessing the feature preservation characteristics of the original noised data and those of the filtered image. 
+When there is no ground-truth given, the feature are estimated in both the original noised and the filtered images.
+Evaluation would then determine how closely related the two feature maps are. 
+Various methods may be applied extract features; some that have been used are the Hough Transform (Merdios), Sobel edge detector (cite) or edge map (Frost).
+While significant effort has been spent on these evaluations, we believe that the methodology is overly imprecise because feature extraction algorithms are thesleves only approximations whose accuracy is dependent upon noise, and heavily dependent upon the characteristics of the original image.
+Thus without a clear understanding of these dependencies, and how they relate to the characteristics of the speckle filter under evaluation, one may question the effectiveness, repeatibility and accuracy of such an approach. 
+%Note that also, using feature extraction algorithms to evaluate speckle filters, which invariably suppress the same noise, leave serious questions on how to interprete those quantitative measurement results.
+%is just too imprecise for us.
+
+Since SAR statistical models are quite well understood, the use of simulation experiments with known ground-truth offers a reasonably good approach without the need to apply feature detection. However we also propose the use of extremely simple feature extraction algorithms (i.e. a simple threshold based classifier) for which any dependency between its performance and noise can be (or already has been) very well established. The performance dependency can be sufficiently captured by knowledge of the Receiver [IVM: Operating??] Characteristics Curve (ROC) and the Area Under the curve (AUC). The can then enable the comparative evaluation of feature preservation capabilities of different speckle filters.
+
+There are two main ways that ground truths are used in evaluating speckle filters.
+A simple method is to embed speckle noise into an existing optical image, and then use the filters to estimate noise-free imagary from this. Normally the image is large, with a number of different features and test conducted in once. The benefit of this method is that a wide range of features can be tested, which is probably closer to the real-life situation. The main drawback is that, since the noise embedding process is stochastic in nature, reporting only a single experimental is probably not providing a very representative result. It is of course, also dependent upon the nature of the test image and noise embedded process employed.
+
+%IVM The methodology could also be applicable in log-transformed domain, however, as the evaluation methodology is the same, we prefer to apply the technique on investigating the residual image in log-transformed domain on real-life image instead.
+
+Another method is to evaluate using a patterned, structured and repeated ground truth which may be artificial or real.
+Since the structure is repeated many times, the combined results become more representative. Also, the patterns can be pre-designed and lead to the possibility of repeatable evaluations between research groups.
+The drawback is that only a single type of target can be tested per image. These types may normally be point targets, edges and lines (all features that are currently used to evaluate speckle filters).
+
+Even with known ground-truth, evaluating metrics need to be defined for quantitative measurements too. The most common image processing method to detect a target from its background is to compute their differences in intensity or amplitude domain. However since SAR noise is multiplicative, this difference is not only dependent on the noise level but also on the amplitude level of the signal itself.
+Shi define the mid-point position of an edge as the intensity value between the nominal values of the two regions, $M= { E(X_t) + E(X_b)}/{2}$
+	and the sharpness of an edge as the slope between the two nominal intensities value, $S=E(X_t)-E(X_b)$, 
+	where $E()$ denotes expectation operator. 
+
+Lopes also proposed the variation co-efficient index $C_v = var(I)/avg(I)$ to evaluate speckle filters.
+However, since Lopes' underlying assumption of the scene variation may not be applicable in a designed test pattern, we do not consider the index further in these experiments.
+
+Since we expect the filters to be consistently behaved in the log-transformed domain, then as we repeat a pattern multiple times, the histograms of target and background areas can be obtained.
+
+%They are expected to be consistent in log-transformed domain.
+The target and background can then be seperated using a simple threshold based classification model.
+We judge the separability of the two stochastic populations by the standard ROC, and the quantitative metric of Area Under the ROC Curve (AUC) can then be used as an evaluation metric.
+
+Overall, we see many different methods and metrics used for evaluating speckle filters. However it is clearly advantageous to have a single metric that is able to judge if one filter is better than another. Wang has attempted to look at the problem: he proposed using fuzzy membership to weight opinions of an expert panel. Although this provides a potential solution, we consider it to be tedious in implementation, fuzzy in concept and is still subjective in nature.
+
+Another attempt is to apply a universal mean squared error criteria into the context of SAR data. However since SAR data is heteroskedastic, the use of MSE is not straightforward. Thus Gagnon suggested the use of the signal over mean square noise removed metric, which is argued to be similar to the standard signal to noise ratio (SNR) in intrepretation. Others have suggest the use of normalized MSE, which is essentially the ratio between MSE and the expected mean.
+
+In this paper, we propose the use of MSE in the homoskedastic log-transformed domain. This is similar to the investigation of residual image in log-transformed domain and also agrees with the log-transformed variance metric in homogeneous area (assuming that the filters have no problem preserving the mean). We also show experimentally that this MSE measure is inversely correlated with the AUC index mentioned earlier, suggesting that the lower the MSE index a filter can achieve, the better its feature preservation capability can be.
+
+To explore this concept, the rest of this paper is structured as follows.
+Section 2 will provide a brief discussion of Log Transformation, followed in Section 3 by the use of MSE in the log-transformed domain to evaluate different filter's speckle suppression power in homogeneous area.
+Section 4 will illustrate the use of the same MSE to evaluate different filters' performance in heterogeneous area, while Section 5 will analyse these results and provide concluding remarks.
+
+\section{Logarithmic Transformation}
+
+%\section{Logarithmic Transformation of SAR Single look data}
+
+%The nature of SAR speckle is stochastics over homogenous areas and heteroskedastic heterogenously. Statistical models are used to describe how the underlying back-scattering coefficient ($\sigma$) affect the distribution of measured SAR data. Speckle filtering, by and large, are estimators attempting to the unknown coefficient from observable SAR signal $(A)$. 
+
+%SAR speckle-filtering can be and has been positioned within the context of estimation theory\cite{Touzi_2002_TGRS}. The statistical framework attempts to estimate unknown statistical parameters from observed data. The stages consist of statistical modelling, estimator development and evaluating of the performance of estimators. Estimators' are evaluated based on the bias and variance properties of their estimates. The performance evaluation is usually based qualitatively on some real data and quantitatively through simulated experiments. Due to the stochastic nature of simulation process, results of repeated experiments are normally preferred.
+
+%\section{SAR speckle statistic model}
+
+%Useful, robust estimators require un-assuming models. This section will describe our model for speckle filtering. The first part will explain the heteroskedastic nature of original amplitude and intensity SAR data. In extending the original model to log-transformed domain, care has been taken to rely solely on rigorous mathematical and statistical principles.
+
+In this section, we will first discuss the original SAR domain where the noise is primarily multiplicative and heteroskedastic.
+Next we will explore log transformation to convert the data into additive and homoskedastic model, where the noise is not only additive but also \textit{independent of the underlying radiometric signal}.
+From the consistent and additive noise in log-transformed domain (i.e. given the radiometric value is known, the plots of $ln(I)$ would be fixed), we describe the consistent sense of dispersion and contrast (i.e. the plots of $ln(I)-ln(avg(I))$ and $ln(I_1)-ln(I_2)$ are fixed assuming an underlying homogeneous area with constant radiometric level, regardless of its specific value).
+%Note: include the simple equation $ln(I)-ln(avg(I)) = ln(I/avg(I))$ as this provides the cue for later POLSAR paper $ln(det(C)/avg(det(C)))$.
+
+\subsection{Original Heteroskedastic Model}
+
+SAR speckle phenomena is often explained as the interference of many coherent but dephased back-scattering components, each reflecting from different and distributed elementary scatterers \cite{Oliver_ProcIEEE_1963, Leith_ProcIEEE_1971}. These interference can be considered as a random walk on the 2D complex plane \cite{Goodman_JOptSocAm_76}.  The random nature of the process arises due to the unknown random location, height, distance and thus random phase of each elementary scatterer and its response.
+
+Assuming the Central Limit Theorem is applicable \cite{Goodman_Springer_1975}, then the real part $A_r$ as well as the imaginary part $A_i$ of the observed SAR signal $A$ can be considered as random variables from uncorrelated Gaussian distributed stochastic processes with zero means and indentical variances $\sigma^2/2$  \cite{Lee_CRCPress_2009}. Their probability density function (pdf) is given as:
+
+\begin{equation}
+\label{eqn:component_signal_pdf}
+pdf(A_x)=\frac{1}{\sqrt{\pi} \sigma} e^{\left( \frac{A_x^2}{\sigma^2} \right) }
+\end{equation}
+
+It then can be proved that the measurable amplitude $A=\sqrt{A_r^2+A_i^2}$ is a random variable of Rayleigh distribution and consequently intensity $I=A^2=(A_r^2+A_i^2)$ is a random variable of negative exponential distributed random process.
+
+\begin{IEEEeqnarray}{l l l}
+pdf(A) &=& \frac{2A}{\sigma^2}e^{ \left( -{A^2}/{\sigma^2} \right) }\\
+pdf(I) &=& \frac{1}{\sigma^2}e^{\left( -{I}/{\sigma^2} \right) }
+\end{IEEEeqnarray}
+
+From a statistical perspective, the multiplicative nature of amplitude and intensity data can be explained as follows. Consider two fixed, independent to $\sigma$, unit distributions given below:
+
+\begin{IEEEeqnarray}{l l l}
+pdf(A_1) &=& 2A_1 e^{ \left( A_1^2 \right) }\\
+pdf(I_1) &=& e^{ \left( -I_1 \right) }
+\end{IEEEeqnarray}
+
+It is then trivial to prove that amplitude and intensity is simply a scaled version of these unit variables, ie. $A= \sigma A_1 $ and $I= \sigma^2 I_1 $. 
+These relationships evidently manifest a mutiplicative nature. 
+%IVMremoved the comment from this:
+In fact, this condition has long been noted, but from a different perspective, in various SAR models including the multiplicative model (cite JS Lee) and product model \cite{Jakeman_1980_JPhysAMathGen}.
+
+If spatial homogeneity is defined as imaging scenes having the same back-scattering coefficient $\sigma$, then over a homogenous area, the measured values can then be considered as samples coming from a single stochastic process. Consequently, the expected population mean and variance of the four distributions are given in table \ref{tbl:orginal_sar_avg_var} 
+
+\begin{table}[!h]
+\caption{Both the mean and the variance of noisy SAR image data are related to the scale factor $\sigma$.}
+\label{tbl:orginal_sar_avg_var}
+\normalsize
+\centering
+%\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Mean & Variance \\
+\hline
+% $avg(A_1) = \frac{ \sqrt{\pi}}{2}$ & $var(A_1) = \frac{(4-\pi)}{4}$ \\
+% $avg(I_1) = 1$ & $var(I_1) = 1$ \\
+% $avg(A) = \frac{\sqrt{\pi}}{2} \cdot \sigma $ & $var(A) = \frac{(4-\pi)}{4} \cdot \sigma^2 $ \\
+% $avg(I) = \sigma^2 $ & $ var(I) = \sigma^4$ \\
+%%IVM: I changed some \frac to / so that they fit better on one line:
+$avg(A_1) = { \sqrt{\pi}}/{2}$ & $var(A_1) = {(4-\pi)}/{4}$ \\
+$avg(I_1) = 1$ & $var(I_1) = 1$ \\
+$avg(A) = {\sqrt{\pi}}/{2} \cdot \sigma $ & $var(A) = {(4-\pi)}/{4} \cdot \sigma^2 $ \\
+$avg(I) = \sigma^2 $ & $ var(I) = \sigma^4$ \\
+\hline
+\end{tabular}
+%\end{center}
+\end{table}
+
+From the above analysis, it is evident that amplitude as well as intensity SAR data suffer from hetoroskedastic phenomena, which is defined as the dependence of conditional expected variance of SAR data on the conditional expectation of the mean. In the context of speckle filtering, table \ref{tbl:orginal_sar_avg_var} indicates the vicious circle: estimating variance is equal to estimating the mean and is equivalent to the main problem, ie. estimating the unknown parameter $\sigma$. 
+
+%IVMuncommented this:
+The relationship above has, of course, long been noted. In fact while pioneering the estimation of the equivalent number of look (ENL) index, Lee et al. had noted that the ratio of expected standard deviation to mean is a constant in both cases (ie. $snr(A)=\sqrt{{4}/{\pi}-1}$ and $snr(I)=1$). Here, we offer an altrenative intepretation of that fact, leading to the proposed log-transform domain MSE measures later.
+
+\subsection{ The effects of Heteroskedasticity on Speckle Filters }
+
+%For about 30 years, speckle filtering has been an active research area, with new methods being introduced steadily. 
+%That is because: eventhough, the statistical model within individual resolution cell is well established, the applicability of its models is restricted to homogenous areas. 
+%Practical images, however, are heterogenous. Crucially it is this spatial variation that is of high interest. This fact gives rise to the question that seemed obvious: how to call an analysis area heterogenous and subsequently what to do in the case of heterogeneity.
+
+
+Various statistical models for heterogenous areas have been proposed (see \cite{Touzi_2002_TGRS} for a detailed review). Unfortunately, while most of the models highlight the multiplcative nature of sub-pixel or homogenous original SAR data, in extending the models to heterogenous images, virtually none have noted that spatial varition also gives rise to the heteroskedasticity phenomena. Heteroskedasticity, as explained in the previous section, is defined as the dependence of conditional expected variance of original SAR data on the conditional expectation of its mean, or equivalently its underlying back-scattering coefficient $(\sigma)$. It is believed that this heteroskedasticity give rise to serious negative impacts at various stages of speckle-filtering. 
+
+In modelling, heteroskedasticity has direct consequences to the central question of homogeneity or heterogeneity. In normal images, the contrast or variance among neighboring pixels is often used to measure homogeneity. Unfortunately such techniques do not appear to be effective under the heteroskedastic condition of original SAR data. In SAR images, both of these measures are dependent on the underlying coefficient $(\sigma)$. This make the problem of estimating variance to be equal to the problem of estimating the mean (i.e. equivalent to estimating $\sigma$).
+
+A case in point can be illustrated by the recently published improved sigma filter\cite{Lee_TGRS_2009}. The technique determines outlying points as those being too far away from the standard deviation. However, to estimate standard deviation, an estimator of mean is required and used. It is interesting to note that the MMSE estimator used to estimate the mean in \cite{Lee_TGRS_2009}, itself alone, is a rather successful speckle-filter\cite{Lee_PAMI_1980}.
+
+Heteroskedasticity also poses numerous challenges in designing and evaluating an efficient estimator since it directly violates the Gauss-Markov theorem's homoskedastic assumption. 
+Thus it renders the efficiency of any na\"{i}ve Ordinary Least Square estimator to be in serious doubt \cite{Furno_1991_JStatCompSimul}. 
+If the variance is known \textit{a priori}, it has been proven, (cite Aitken), that a weighted mean estimator is the best linear unbiased estimator. 
+Interestingly, as noted by Lopes \cite{Lopes_TGRS_1990}, most known common successful adaptive filters \cite{Lee_PAMI_1980} \cite{Kuan_1985_PAMI} \cite{Frost_PAMI_1982} do make use of weighted mean estimators. 
+
+The caveat however is that in SAR speckle filtering, variance is not known \textit{a priori}. And although variance can be estimated from observable values, as the vicious circle goes, estimating the variance is as good as estimating the underlying coefficient $\sigma$ itself.
+
+%Heteroskedastic makes it tricky to evaluate the performance of different estimators, even if quantitative experiments results is reported. In fact several quantitative simulated experiments has been carried out to compare the performance of different estimators\cite{Lee_TGRS_2009}. However only results of single experiment were reported. Due to the stochastic nature of the simulated experiement process, more experiments should be done to report the effectiveness, ie. variance, of each estimators' results.
+
+Last but certainly not least, is the bad impact of heteroskedastic on SAR image interpretation. Most of the task to be carried out in intepreting SAR images almost certainly involves target detection, target segmentation and/or target classification. Each of these tasks require good similarity or discriminant functions. Foundational to these is the need of a consistence sense of distance. Unfortunately, by definition heteroskedasticity leads to inconsistent measures of distance. This inconsistent sense of distance coupled with the failure of the ordinary least square regression methods are believed to cause a large class of artificial neural networks as well as a number of other computational intelligence methods to underperform on the SAR classification task.
+
+%In this paper, we aim to neutralize these various impacts. The paper is organized as follows. Section ??? will be devoted to discussion of the heteroskedastic phenomena in the original per-pixel SAR amplitude and intensity model. Logarithmic transformation is extended to the model and the homoskedastic property of it is asserted. Section ??? will discuss how sampling distribution of variance in the log-transformed domain can be used to model various degrees of homogeneity. Section ??? will presents a novel speckle filtering algorithm developed from heterogenous inference made possible by statistical testing of sample variances. Section ??? will present evaluation of our estimator both quantitatively through simulated experiments and qualitatively on real-life images.
+
+\subsection{ Homoskedastic effect of Logarithmic Transformation }
+
+In this paper, we propose using base-2 logarithmic transformtion of SAR orignal random variables. Base-2 is chosen for implementation reasons since it can be computed faster than either natural or decimal logarithms, and yet it maintains the ability to transform heterskedactic speckle into a homoskedastic relationship. Thus the original variables become:
+
+%%%%IVM: Hai, these look really strange?  Why have L_{1^A} instead of (for example), L_{1A} or L_{1}A??
+
+\begin{IEEEeqnarray}{l l l l l}
+L_{1^A} &=& \log_2(A_1) &=& L_{1^I} / 2 \\
+L_A &=& \log_2(A) 	&=& L_{1^A} + \log_2\sigma \\
+L_{1^I} &=& \log_2(I_1) \\
+L_I &=& \log_2(I) 	&=& L_{1^I} + 2 \log_2\sigma
+\end{IEEEeqnarray}
+
+Bearing the relationship among the random variables in mind, it is then trivial to give the probability distribution of these log-transformed variable as follows:
+
+\begin{IEEEeqnarray}{l l l}
+pdf(L_{1^A}) &=& 2 \cdot 2^{\left[ 2 L_{1^A} - 2^{2 L_{1^A}} \right]} \\
+pdf(L_A) &=& 2 \cdot 2^{\left[ \left( 2 L_A - 2 \log_2 \sigma \right) - 2^{\left( 2 L_A - 2 \log_2 \sigma \right)} \right]} \\ 
+pdf(L_{1^I}) &=& 2^{\left[ L_{1^I} - 2^{L_{1^I}} \right]} \\
+pdf(L_I) &=& 2^{\left[ \left( L_I - 2 \log_2 \sigma \right) - 2^{\left( L_I - 2 \log_2 \sigma \right)} \right]} 
+\end{IEEEeqnarray}
+
+Noting that these distributions belong to the Fisher-Tippet family, the population expected mean and variances are obtained as in table \ref{tbl:sar_log_domain_avg_var}, with $\gamma$ being the Euler-Mascheroni constant. Most importantly, it can be seen that the means are biased and the variances are no longer related to $\sigma$ 
+
+\begin{table}[!h]
+\caption{ Mean and Variance of Log Transformed SAR values. }
+\label{tbl:sar_log_domain_avg_var}
+\normalsize
+\centering
+%\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Mean & Variance \\
+\hline
+$avg(L_{1^A}) = \frac{ \gamma }{2} \cdot \frac{1}{\ln2}$ & $var(L_{1^A}) = \frac{ \pi ^2}{24} \cdot \frac{1}{(\ln2)^2}$ \\
+$avg(L_{1^I}) = \gamma \cdot \frac{1}{\ln2} $ & $var(L_{1^I}) = \frac{ \pi ^2}{6} \cdot \frac{1}{(\ln2)^2} $ \\
+$avg(L_A) = \frac{ \gamma }{2} \cdot \frac{1}{\ln2} + \log_2{\sigma}$ & $var(L_A) = \frac{ \pi ^2}{24} \cdot \frac{1}{(\ln2)^2}$ \\
+$avg(L_I) = \gamma \cdot \frac{1}{\ln2} + 2 \log_2{\sigma}  $ & $ var(L_I) = \frac{ \pi ^2}{6} \cdot \frac{1}{(\ln2)^2}$ \\
+\hline
+\end{tabular}
+%\end{center}
+\end{table}
+
+The equations above also highlight the relationships among random variables in the log-transformed domain. 
+Two conclusions become evident from these formula. 
+Firstly, in the log-transformed domain, working on eithre amplitude or intensity will tend to give identical results. 
+Secondly, the effects of converting the multiplicative nature to an additive nature through logarithmic transformation is clearly manifested. 
+Table \ref{tbl:sar_log_domain_avg_var} confirms the condition of homoskedasticity,  defined as the independence of the conditional expected variance on the conditional expectation of the mean. 
+
+This result is consistence with finding by Arsenault \cite{Arsenault_JOptSocAm_1976}.  
+The main difference would be the use of base-2 logarithm which is prefered here for faster computation. 
+
+Table \ref{tbl:sar_variables_properties} summarize the discussion so far. It can be seen that while the original data, especially intensity values, should be prefered for multi-look processing, the log-transformed domain with its homoskedastic distribution, offers a consistent sense of dispersion and contrast. Thus log transformation is shown here to be a homomorphic transformation, allowing one to apply traditional linear, additive, least squared error regression signal processing (inculding wavelets) and computational (including artificial neural network) techniques into SAR data.
+
+\begin{table*}[t]
+\normalsize
+%\hrulefill
+
+%\begin{center}
+\centering
+\caption{ The properties of observable SAR random variables }
+\label{tbl:sar_variables_properties}
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+ RV & Relationships  & Variance (skedasticity) & Mean (biasness) \\
+\hline
+$A$ & $A=\sigma A_1 $ & Heteroskedastic $var(A) = \frac{(4-\pi)}{4} \cdot \sigma^2 $ & Unbiased $avg(A) = \frac{\sqrt{\pi}}{2} \cdot \sigma $ \\
+$I$ & $I=A^2=\sigma^2 I_1 $ & Heteroskedastic $ var(I) = \sigma^4$ & Unbiased $avg(I) = \sigma^2 $\\
+$L_A$ & $L_A=\ln(A)=L_{1^A} + \log_2{\sigma}$ & Homoskedastic $var(L_A) = \frac{ \pi ^2}{24} \cdot \frac{1}{(\ln2)^2}$ & Biased $avg(L_A) = \frac{ \gamma }{2} \cdot \frac{1}{\ln2} + \log_2{\sigma}$ \\
+$L_I$ & $L_I=\ln(I)=L_{1^I} + 2 \log_2{\sigma}$  & Homoskedastic $var(L_I) = \frac{ \pi ^2}{6} \cdot \frac{1}{(\ln2)^2}$ & Biased $avg(L_I) = \gamma \cdot \frac{1}{\ln2} + 2 \log_2{\sigma}  $ \\
+\hline
+\end{tabular}
+
+%\end{center}
+\end{table*}
+
+In order to explore this experimentally, Fig. \ref{fig:modelled_response} plots the histogram of observable data within a known homogenous area (from a RADARSAT2 image) against modelled PDF response. The excellent agreement that can be seen in Fig. \ref{fig:modelled_response} between the model and experimental data has long been noted in such graphs. In fact, this modelling has been used successful in explaining speckle phenomena, also verified through scientific experiments \cite{Ulaby_TGRS_1988}.
+
+[IVM: Hai -following this paragraph, how can we say that your work is better/different???]
+
+
+[IVM: Hai - I can't see the text on the graph. you need to redraw, probably need to add the axes and labels manually... unfortunately this applied to ALL of the graphs...???]
+\begin{figure}[h]
+\centering
+%\centerline{
+\begin{tabular}{c}
+	\subfloat[amplitude]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/amplitude_hist_model_pdf_scene1.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[intensity]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/intensity_hist_model_pdf_scene1.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[log amplitude]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_amplitude_hist_model_pdf_scene1.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[log intensity]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_intensity_hist_model_pdf_scene1.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{Observed histogram in homogenous area and modelled pdf response}
+\label{fig:modelled_response}
+\end{figure}
+
+%Logarithmic transformation has long been noted \cite{Arsenault_JOptSocAm_1976} as being able to transform multiplicative nature of SAR data into additive nature but most of the focus has been on addition of multi-samples for multi-look processing in the log-transformed domain. However, in this paper the investigation of variance is the focus.
+
+%\section{Variance in Log-Transformed Domain}
+
+\subsection{Consistent sense of distance in Log-Transformed domain}
+
+The consistent sense is explored and illustrated in this section from two different perspectives. First, we assume that the back-scattering coefficient $\sigma$ is known \textit{a priori}. Consider the random variable defined as the distance between an observable sample and its expected value:
+
+\begin{IEEEeqnarray}{l l l l l}
+D^A &=& A &-& avg(A) \\
+D^I &=& I &-& avg(I) \\
+D^{L_A} &=& L_A &-& avg(L_A) = log_2{ \left( \frac{A}{avg(A)} \right)}\\
+D^{L_I} &=& L_I &-& avg(L_I) = log_2{ \left( \frac{I}{avg(I)} \right)}
+\end{IEEEeqnarray}
+
+Noting the results from previous section, the pdf for these variable can be trivially given as 
+
+\begin{IEEEeqnarray}{l l l}
+pdf(D^A) &=& \frac{2\left( D^A + \frac{\sqrt{\pi}}{2} \sigma \right)}{\sigma^2}e^{ \left( -\frac{\left( D^A + \frac{\sqrt{\pi}}{2} \sigma \right)^2}{\sigma^2} \right) } \\
+pdf(D^I) &=& \frac{1}{\sigma^2}e^{\left( -\frac{\left( D^I + \sigma^2 \right)}{\sigma^2} \right) } \\
+pdf(D^{L_A}) &=& 2 \cdot 2^{\left[ \left( 2 D^{L_A} + 2 \frac{\gamma}{2 \ln2} \right) - 2^{\left( 2 D^{L_A} + 2 \frac{\gamma}{2 \ln2} \right)} \right]} \\
+pdf(D^{L_I}) &=& 2^{\left[ \left( D^{L_I} + \frac{\gamma}{\ln2} \right) - 2^{\left( D^{L_I} + \frac{\gamma}{\ln2} \right)} \right]}
+\end{IEEEeqnarray}
+
+It is evident from the equations that these distributions are dependent on $\sigma$ in the original SAR data but are independent of it in the log-transformed domain.
+
+From a second perspective, given two adjacent resolution cells that are known to have the identical but unknown back-scattering coefficient $\sigma$, consider the random variable defined as the contrast between two measured samples, in the log-transformed domain. 
+
+\begin{IEEEeqnarray}{l l l l l}
+C_{L^A} &=& L_1^{A_\sigma} &-& L_2^{A_\sigma} = log_2 { \left( {A_1}/{A_2} \right) }\\
+C_{L^I} &=& L_1^{I_\sigma} &-& L_2^{I_\sigma} = log_2 { \left( {I_1}/{I_2} \right) }
+\end{IEEEeqnarray}
+
+Noting that $C_x = D_1^x - D_2^x$, it should come as no suprise that the sense of contrast is consistent in the log-domain but inconsistent in the original domain. The pdf of these variables can be given as:
+
+\begin{IEEEeqnarray}{l l l}
+pdf(C_{L^A}) &=& 2 \frac{2^{\left(2 C_{L^A} \right)}}{1+2^{\left( 2 C_{L^A} \right)}} \ln2  \\
+pdf(C_{L^I}) &=& \frac{2^{\left( C_{L^I} \right)}}{1+2^{\left( C_{L^I} \right)}} \ln2 
+\end{IEEEeqnarray}
+
+Figure \ref{fig:residual_as_noise} illustrates this, showing excellent agreement between the analytical pdf and observable histogram of distance and contrast of the same area in a log-transformed intensity RADARSAT-2 image. Distance is calculated as the difference between each value point and the average value of that region, while contrast is calculated as the difference between two horizontally adjacent values in the log-transformed domain.
+
+\begin{figure}[h!]
+\centering
+%\begin{tabular}{c}
+	\subfloat[distance]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_intensity_dispersion_hist_model_pdf_scene1.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill
+	\subfloat[contrast]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_intensity_contrast_hist_model_pdf_scene1.eps} 	
+		 \label{intensity}
+	}
+%\end{tabular}
+\caption{Observed and modelled pdf of distance and contrast in homogenous log-transformed intensity images.}
+\label{fig:residual_as_noise}
+\end{figure}
+
+Given that real SAR images are heterogenous and the back-scattering coefficient is unknown, it is evident that the sense of observable distance in original SAR data differs, ie. is inconsistent, across different homogenous areas. The observable distance in the log-transformed domain however is consistently the same across different homogenous areas. One possible benefit is that should the sigma filter be designed against the $pdf(C_{L^I})$, the scale estimator would no longer be required. 
+
+The consistent sense of distance can be used to test if a pixel belong to a ``known'' scatterer or to test if the any pair of measured data points belongs to the same class of scatterer. 
+It may also serve to explain why, in the original SAR data domain, ratio based detector/classifiers are prefered to the differential measures that serve so well for other areas of image processing (the reason being that the differential is not consistent for SAR data).
+The consistent sense of contrast also gives rise to the consistent sense of variance, which can be used to test if a group of pixels can form a homogenous area.
+
+%In log transformed domain however, the standard differential methods can be used 
+
+%The conclusion in this section can be extended to larger number of pixels via the analysis of observable sample variance. 
+
+%\subsection{Sampling distribution of Variance in Log-Transformed domain}
+%
+%From previous section result, two sample variance distribution ($V_x = C_x^2$) can be given analytically as
+%
+%\begin{IEEEeqnarray}{l l l}
+%pdf(V_{L^I}) &=& 
+%	\frac{\ln2}{2} \frac{1}{\sqrt{V_{L^I}}} \left( \frac{2^{\sqrt{V_{L^I}}}}{\left( 1+2^{\sqrt{V_{L^I}}} \right)^2} + \frac{2^{-\sqrt{V_{L^I}}}}{\left( 1+2^{-\sqrt{V_{L^I}}} \right)^2} \right)\\
+%pdf(V_{L^A}) &=&
+%	\frac{\ln2}{4} \frac{1}{\sqrt{V_{L^A}}} \left( \frac{2^{\sqrt{4 V_{L^A}}}}{\left( 1+2^{\sqrt{4 V_{L^A}}} \right)^2} + \frac{2^{-\sqrt{4 V_{L^A}}}}{\left( 1+2^{-2\sqrt{V_{L^A}}} \right)^2} \right)
+%\end{IEEEeqnarray}
+%
+%As log-transformed amplitude $L_A$ is simply half of log-transformed intensity values $L_I$, for brevity purposes, only results for log-transformed intensity values are presented.
+%
+%It could be seen that, in log-transformed domain, not only the expected mean of observable variance is constant, the sampling distribution of this random variable is independent to $\sigma$. We have seen this analytically for two sample variances. For larger number of samples, Monte-Carlo simulation is used to visuallize pdf of sample variances.
+%
+%\begin{enumerate}
+%\item Each input sample is a random and independent set of n samples each drawn from a single pdf given in $pdf(L_A)$ or $pdf(L_I)$
+%\item For each input set, the sample variance is calculated
+%\item For all input set, a histogram of calculated values is ploted
+%\item Number of input sets data generated is pre-determined as either 10000 (rough line) or 1000000 (smooth line)
+%\end{enumerate}
+%
+%Here a figure giving simulated sampling distribution of variances with number of samples ranging from 2-9, analytical charts of 2, homogenous sample variances of 9. purpose to show match of is simulation with analytical, and simulation with measured data.
+%
+%Here gives an example showing sample variance calculated from a SAR image.
+
+\section{Evaluating Speckle Filters on Homogeneous Areas}
+
+\subsection{Experimental Results}
+
+Fig. \ref{fig:log_consistency_model} illustrates the concept of consistency by plotting histograms of homogenous SAR data over different radiometric values.
+Both single-look simulated and multi-look processed/box-car filtered data is displayed.
+Specifically the plots show that the log-transformed domain is consistent while the plots from the original domain are not.
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Single-Look in Log Domain]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_none.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Multi-Look in Log Domain]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_boxcar.png.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Single Look in Intensity]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/orig_inconsistency_none.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Multi Look in Intensity]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/orig_inconsistency_boxcar.png.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{Consistency demonstrated in the log-transformed domain and inconsistency evenident in the original SAR domain}
+\label{fig:log_consistency_model}
+\end{figure}
+
+Fig. \ref{fig:log_consistency_filters} shows that the standard filters (Lee, Kuan, Frost and Gamma MAP) preserve this consistency in their filtered output. Intuitively, the reader may want to be reminded that the boxcar filter is actually multi-look processing.
+%IVM: why?  I'm not sure I follow this or the sentence below.
+
+This consistency will also lead to the consistent sense of distance described earlier and is significant because it is the tell-tale sign of the consistent contrast and variance.
+This ensures applicability of various target detection/classification algorithms which employ the statistical properties in the un-filtered data, for example the ratio based discriminator in the original domain or the differential based discriminator in the log-transformed domain.
+
+%We can briefly mention that the expected mean value are also preserved by the filters.
+
+%This consistent sense of distance may explain a few phenomena that appears to be unrelated before.
+%First it explain why in SAR edge detector is prefered to normal differential based detectors $R=I_1/I_2$ and $D=ln(I_1)-ln(I_2)$. In other words, in log-transformed domain, the standard differential based detector should also work.
+%It leads to consistent variance in log-transformed domain, which we measured across the filtered results for different radiometric values.
+%It could also explains why in the origianl domain, the ratio between variance/mean that is the ENL is a robust evaluation metric (it is consistent and thus can be evaluated on homogeneous area, regardless of specific radiometric value).
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Lee filter]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_lee.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Kuan Filter]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_kuan.png.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Frost Filter]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_frost.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Gamma MAP filter]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/log_consistency_map.png.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{Filtered results: consistency in log-transformed domain}
+\label{fig:log_consistency_filters}
+\end{figure}
+
+\subsection{ Estimating ENL from MSE index in homogeneous areas }
+
+Next we wish to show that the variance in the log-transformed domain can be mathematically related to the universal ENL index.
+
+%Variance computation is theoretically given by Hoek and Xie.
+%We show the computation can be simplified as in the confirmation report.
+%Thus given an known homogeneous area, the log-variance can be computed and the ENL can be evaluated as ...
+%We repeat the experiment in the confirmation report to confirm the agreement between theoretical analysis and experimental results. 
+We assume that over homogeneous areas, the ground-truth remains unchanged, i.e. $X^L_i=X^L \forall i$. If a filters is unbiased, or the bias is already compensated for, i.e. $E(Y^L)=X^L$, then the MSE between unfiltered and filtered output becomes:
+
+\begin{equation}
+\Psi = \frac{ \sum^N_{i=1}{ (Y^L_i - E(Y^L)) } }{N} = var(Y^L)
+\end{equation}
+
+That is, for known homogeneous scenes, MSE can be estimated as the observable variance of the filtered output in the log-transformed domain.
+
+Now, let us consider the speckle suppression effect of multi-look processing in the log-transformed domain. 
+First of all, since multi-look processing is unbiased, we will take the variance of the log-transformed multi-look processing output as the MSE performance index. 
+Hoek \cite{Hoekman_1991_TGRS} and Xie \cite{Xie_2002_TGRS} have given the variance for $L$-look log-transformed random variable as: 
+
+\begin{equation}
+var(Y^L)= \frac{1}{\ln^2(2)} \left( \frac{\pi^2}{6} - \sum^{L-1}_{i=1}{\frac{1}{i^2}} \right)
+\end{equation}
+
+Next we will be showing that the ENL, i.e. $L$, can be estimated from a given $var(Y^L)$. 
+Taking results of the Euler proof for the Basel problem we have 
+
+\begin{equation}
+\frac{\pi^2}{6} = \sum^{\infty}_{i=1}{ \frac{1}{i^2} }
+\end{equation},
+
+so then 
+
+\begin{equation}
+\Psi= \frac{1}{\ln^2(2)} \left( \sum^{\infty}_{i=L}{ \frac{1}{i^2} } \right)
+\end{equation}.
+
+Noting that 
+
+\begin{equation}
+\frac{1}{i} - \frac{1}{i+1} = \frac{1}{i(i+1)} < \frac{1}{i^2} < \frac{1}{i(i-1)} = \frac{1}{i-1} - \frac{1}{i}
+\end{equation}, 
+
+then 
+
+\begin{equation}
+\frac{1}{L} - \frac{1}{\infty} < \sum^{\infty}_{i=L}{ \frac{1}{i^2} }  < \frac{1}{L-1} - \frac{1}{\infty}
+\end{equation}.
+
+In fact, we could estimate:
+\begin{equation}
+  \Psi = \frac{1}{(L-0.5) \ln^2(2) }
+\label{eqn:perf_index_analytic}
+\end{equation}
+
+Thus, the Equivalent Number of Looks, i.e. $L$, can be estimated as:
+\begin{equation}
+ENL = \frac{1}{\Psi \ln^2(2)} + 0.5
+\label{eqn:enl_analytic}
+\end{equation}
+
+Let us demonstrate the above analysis experimentally.
+We shall take a known $256\times256$ homogeneous area and corruptit with SAR-speckle pdf. Different multi-look processing filters are then repeatedly applied to the patch and the observable variance in the log-transformed domain is calculated. 
+For each simulation run, the mean and variance values are reported in table \ref{tab:enl_in_log_domain}. 
+The analysis values are calculated from eqn. \ref{eqn:perf_index_analytic}, together with estimated ENL values from eqn. \ref{eqn:enl_analytic}.
+The approximation may not be perfect, but given that ENL is an integer value, the demonstration is extremely clear: the correspondence between actual ENL and estimated ENL is very close.
+
+%%%IVM: Hai, please explain the ontent of the columns (i.e. that's in the brackets??)
+
+\begin{table}
+\centering
+
+\begin{tabular}{c|c|c|c}
+ENL  & Simulation                      &Analysis   &Est ENL       \\% &85\%             &90\%\\
+\hline
+2   &1.3397 ($0.1036 \cdot 10^{-03}$) &1.3423	 &2.0536	\\
+3   &0.8201 ($0.0188 \cdot 10^{-03}$) &0.8220	 &3.0379	\\
+4   &0.5898 ($0.0217 \cdot 10^{-03}$) &0.5907	 &4.0287	\\
+5   &0.4595 ($0.0067 \cdot 10^{-03}$) &0.4607	 &5.0292	\\
+6   &0.3764 ($0.0013 \cdot 10^{-03}$) &0.3774	 &6.0291	\\
+7   &0.3195 ($0.0073 \cdot 10^{-03}$) &0.3196	 &7.0149	\\
+8   &0.2773 ($0.0043 \cdot 10^{-03}$) &0.2771	 &8.0056	\\
+9   &0.2448 ($0.0016 \cdot 10^{-03}$) &0.2446	 &9.0010	\\
+10  &0.2193 ($0.0015 \cdot 10^{-03}$) &0.2189	 &9.9908	\\
+11  &0.1975 ($0.0024 \cdot 10^{-03}$) &0.1981	 &11.0400	\\
+12  &0.1807 ($0.0013 \cdot 10^{-03}$) &0.1809	 &12.0157	\\
+13  &0.1663 ($0.0004 \cdot 10^{-03}$) &0.1664	 &13.0121	\\
+14  &0.1544 ($0.0004 \cdot 10^{-03}$) &0.1541	 &13.9783	\\
+15  &0.1435 ($0.0003 \cdot 10^{-03}$) &0.1435	 &15.0075	\\
+16  &0.1342 ($0.0003 \cdot 10^{-03}$) &0.1342	 &16.0071	\\
+17  &0.1263 ($0.0003 \cdot 10^{-03}$) &0.1261	 &16.9765	\\
+18  &0.1189 ($0.0004 \cdot 10^{-03}$) &0.1189	 &18.0085	\\
+19  &0.1126 ($0.0006 \cdot 10^{-03}$) &0.1125	 &18.9777	\\
+20  &0.1070 ($0.0004 \cdot 10^{-03}$) &0.1067	 &19.9528	\\
+21  &0.1016 ($0.0003 \cdot 10^{-03}$) &0.1015	 &20.9847	\\
+22  &0.0969 ($0.0004 \cdot 10^{-03}$) &0.0968	 &21.9806	\\
+23  &0.0924 ($0.0005 \cdot 10^{-03}$) &0.0925	 &23.0188	\\
+24  &0.0885 ($0.0002 \cdot 10^{-03}$) &0.0886	 &24.0214	\\
+25  &0.0850 ($0.0001 \cdot 10^{-03}$) &0.0849	 &24.9942	
+\end{tabular}
+
+\caption{Speckle Suppression Power: ENL and MSE }
+\label{tab:enl_in_log_domain}
+\end{table}
+
+
+\section{Evaluating Speckle Filters on Heterogenous Area}
+
+For the purpose of comparative, open and repeatable evaluation, in this section we create several test patterns areas which will be used to determine the performance of various common speckle filters.
+
+[IVM: Hai - here you need to add just one sentence saying **why** you want to do this!!????]
+
+\subsection{Evaluating Filters over Repeating Structured Patterns}
+
+%First we discuss the experiments for repeated structured patterns. 
+The types of pattern created here are: point targets, line targets, edge targets and a heterogeneous scene. These test patterns could, of course, be included into a larger composite test image. However we would prefer to highlight the results separately for each individual area.
+All patterns are limited to two class of ground-truth: background and target areas. We will follow the convention in the radar community where the target is signified by the brighter area of the image. Fig \ref{fig:hetero_patterns} shows a small section ($32 \times 32$ window) of each pattern.
+
+%We plots histograms of filtered values on target and background populations in log-transformed domain.
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Line: each line is 1 pixel wide, separated by 4 pixels background]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/pattern_line.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Edge: each stripe is 4 pixel in width]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/pattern_edge.png.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Point: each point is a $2 \times 2$ squares spacing 4 pixels apart]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/pattern_point.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Heterogenous: staggered $1 \times 2$ rectangles]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/pattern_hetero.png.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\centering
+\caption{Example windows of four target patterns, each $32 \times 32$ pixels in size.}
+\label{fig:hetero_patterns}
+\end{figure}
+
+The test patterns are first corrupted with single look noise, and then the filters are applied onto these noised images.
+From a high-level perspective, Fig. \ref{fig:hetero_patterns_roc_auc} show thats feature preservation can be evaluated by examining the separability of the two background and target populations.
+We visualize the separability of the two histograms by plotting the standard Receiver Operating Curve (ROC) and we measure it by computing the Area Under this Curve (AUC) index.
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Simulated Image]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Kuan Filtered Image]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Histograms: Unfiltered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Histograms: Kuan Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.png.eps} 	
+		 \label{intensity}
+	}  \\
+	\subfloat[ROC AUC: Unfiltered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.roc.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[ROC AUC: Kuan Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.roc.png.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{Target and Clutter Separability: ROC and AUC indices}
+\label{fig:hetero_patterns_roc_auc}
+\end{figure}
+
+From a detailed analysis point of view, Fig. \ref{fig:hetero_patterns_mse} shows how the MSE is related to the histograms' capability to seperate.
+%that the radiometric preservation criteria is closely linked to the estimator's bias performance.
+In pre-filtered images, subfigures \ref{fig:hetero_patterns_mse}(c and d), there is no bias error.
+Then the seperability of clutter and target populations depends only on the variance of the additive noise. This variance is visualized as the horizontal spread of the histograms.
+Naturally, given a fixed location (i.e. expectation) of the two populations, the smaller the spread (i.e. variance) the better the separation capability can be.
+
+In post-filtered images (subfigures \ref{fig:hetero_patterns_mse}(d and f), the situation is more complicated.
+Here, besides the effect of the histogram spread, one also needs to take into account bias error.
+Sub fig. \ref{fig:hetero_patterns_mse}(d) show that the Kuan filter, and in fact all of the other filters (whose plots are not reproduced here), introduces a bias error.
+Specifically, the target (brighter) populations are always under-estimated and the clutter (darker) population are always over-estimated.
+This is probably due to the entropy reduction effect of speckle filters, and apparently, assuming that the variances are fixed, the lesser these bias errors, the better the separation capability.
+
+%Also the speckle suppression is related to the measured variance.
+Thus we believe: the MSE performance of the estimator, which combines the effect of bias and variance error, can be used to evaluate the separability of the two histograms. 
+In fact, table \ref{tab:mse_auc_in_log_domain} provides the measurements of MSE and AUC performance for various filters and patterns.
+We note that the MSE in inversely correlated to this separability index, suggesting that the lower MSE achivable by the filters would lead to better feature preservation in general.
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Simulated Residual Image]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.residual.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Kuan Filtered Image]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.residual.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Histograms: Unfiltered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.residual.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Histograms: Kuan Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.png.eps} 	
+		 \label{intensity}
+	}  \\
+	\subfloat[MSE: Unfiltered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.none.residual.mse.png.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[MSE: Kuan Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_patterns.edge.full.kuan.residual.mse.png.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{MSE: Bias Error and Variance Error}
+\label{fig:hetero_patterns_mse}
+\end{figure}
+
+\begin{table}
+\centering
+
+\begin{tabular}{c|c|c|c}
+pattern  & Filter                     & MSE    & AUC       \\% &85\%             &90\%\\
+\hline
+edge	& boxcar	& 0.2929	& 0.9157 \\
+edge	& kuan	  & 0.2615	& 0.9361 \\
+edge	& none	  & 1.9750	& 0.8090
+\end{tabular}
+
+\caption{MORE DATA TO COME: Lower MSE suggest better feature detection (AUC) }
+\label{tab:mse_auc_in_log_domain}
+\end{table}
+
+\subsection{Evaluating Filters over Practical Images}
+
+%The filters are applied on a real SAR data and 
+To compare the use of ratio images in the original domain and the residual image in the log-transformed domain, Fig. \ref{fig:real_image_ratio_vs_residual} shows the residual image in the log-transformed domain and the ratio images in the original domain, where a simple boxcar filter has been applied to a real SAR image (IVM: Hai - please identify the image - NASA/JPL or RADARSAT****???).
+``Visible'' structure appears to be more easily discernable in the log-2 residual random pictures than in the ratio images, although this conclusion is extremely subjective.
+
+[IVM: need to rewrite this later when the following stuff is added:??] Thus to compare the filters against each other, solely using qualitative judgements methodology, be it based on residual or ratio images, would be highly inadequate.
+[IVM: Hai... you indicate you will add more...???] Fig. TODO plots the histogram of the residual images in log-transformed domain for various filters, while table TODO tabulate the computed MSE of the removed additive noise.
+A quantitative measure would probably be measured as how closely this MSE related to the expected noise level in the original image. 
+
+%We plot the histogram of the derived images and evaluate how closely it matches with the noise characteristics of speckled image and show that the two methodologies are equivalent.
+%The distance between the histograms can be measured as the difference between its entropy.
+
+\begin{figure}
+\begin{tabular}{c}
+	\subfloat[Original Patch]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Boxcar Filtered Result]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.boxcar.eps} 	
+		 \label{intensity}
+	} \\
+	\subfloat[Ratio: Filtered / Original]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.ratio2.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Ratio: Original / Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.ratio1.eps} 	
+		 \label{intensity}
+	}  \\
+	\subfloat[Log Residual: Filtered - Original]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.residual2.eps} 	
+		 \label{amplitude}
+	} 
+	\hfill	
+	\subfloat[Log Residual: Original - Filtered]{
+		 \epsfxsize=1.5in
+		 \epsfysize=1.5in
+		 \epsffile{src/heterogenous_real.residual1.eps} 	
+		 \label{intensity}
+	} 
+\end{tabular}
+%}
+\caption{Error Images: Ratio vs. Residual}
+\label{fig:real_image_ratio_vs_residual}
+\end{figure}
+
+%The filters can also be applied on a speckle simulation of an aerial optical image. 
+%A similar evaluation methodology can be applied for this type of experiment.
+%As the ground-truth is available, an extra metric can be measured is the Mean-Squared-Error.
+%However, if this is designed as a single-run experiment, then the measured MSE may not be very representative. 
+%Also it should be noted that the performance of the filters may be dependent on the specific scene chosen, and designing an universal scene to comprehensively evaluate speckle filter is still an open question, as far as we know.
+
+\section{Discussion and Conclusion}
+
+\subsection{Discussion}
+
+In the experiments above we used filters with a $3 \times 3$ sliding window altough we are aware that the normal window size used is much larger. The reasons for maintaining a small window in these tests is that filters with a smaller size allow us to use smaller patterns without too much concern about crosstalk among adjacent targets.
+Secondly, we want to focus on advocating the use of MSE in the log-2 transformed domain for the evaluation of speckle filters, and do not wish to claim or to make any decision regarding which is the ``best'' filter. In other words, we are addressing the method of evaluating filters, and not claiming to address the issue of filter design itself.
+
+However, interested filter designers however are welcome and encouraged to download our Matlab evaluation code online for the purpose of evaluating their designs\footnote{This can be found at \texttt{http:\\\\www.lintech.org\\Hai\\Matlab}}.
+
+Stochastic simulation is used extensively to evaluate the performance of statistical estimators (i.e. speckle filters).
+The use of simulation and modelling in speckle filtering research allows for faster simulation and evaluation of different underlying scenarios. 
+Detailed analysis can then be done repeatedly on simulated small data sets without the need of a common real large image that is somehow representative. This allow qualititative requirements for the speckle removal process to be mapped into specific and quantitative requirements in the design of speckle filters. 
+
+It is interesting to note that all of the standard filters' outputs exhibit consistent plots of histogram in the log-transformed domain, suggesting a consistent sense of distance. 
+This is significant because it is the indicator of consistent contrast and variance.
+This in turn ensures applicability of various target detection/classification algorithms, which employ the statistical properties in the un-filtered data, for example the ratio based discriminator in the original domain or the differential based discriminator in the log-transformed domain.
+
+We believe that the qualitative requirement of speckle suppression can be quantified as the variance in the log-transformed domain. 
+The visual requirements of feature preservation, in the simple scenes of only targets and clutter, can be broken down into the requirements of radiometric preservations and speckle suppression.
+These smaller requirements are equivalent to the bias and variance evaluation of the statistical estimator.
+Overall, while the MSE index combines the measurements of bias and variance evaluation, 
+	the feature preservation requirement, in the context of simple target and clutter scenes, can be measured by the standard metric for target detectability: the Area Under the ROC curve (AUC).
+We show experimentally that the MSE inversely correlates with the AUC index, for all of the simulated test patterns, and real test data.
+
+The patterns used have been chosen based upon our exeriences and may affect evaluation results. It is unlikely that any single test pattern exists that would be `fair' towards every possible filter, filter designers may wish to include these and other test patterns within their evaluations in order to provide a comparative basis for their proposed designs.
+However the patterns serve as guidelines, and filter designers may not want to overly optimize their filter's performance on any single of these patterns since doing so may make the filter lose out in other aspects.
+
+While the patterns may not be the primary evaluative criteria, we believe that the MSE measure in the log-transformed domain (particularly log-2 transformed domain) should receive serious considerations by future filter designers. Again, this is due to good reasons: that the Gauss Markov theorem is applicable in this domain (and not in the original domain). Thus, we believe an optimization for minimal MSE is likely to succeed in good real-world performance.
+
+%We hope and expect to see more standard image processing or signal processing algorithm being applicable to SAR images in log-transformed domain. 
+%Of course the advice is caveat emptor
+
+Finally, although it is widely known that log transformation converts multiplicative noise into additive noise, one should note that the noise is not Gaussian and not even centered around the origin. This may help to explain why averaging filters in the log-transformed domain proposed by Arsenault do not work well in practice.
+To counter this, we suggest the use of maximum likelihood estimation instead of simple averaging (cite our works). In fact, it should be noted that averaging is the MLE estimation in the original domain.
+
+\subsection{Conclusion}
+
+To summarize, speckle filters are generally evaluated using many different qualitative criteria.
+To compare the filters against each other, however, a method is needed to quantify and measure these various qualitative requirements and results.
+Logarithmic transformation has been shown to not only convert multiplicative and heteroskedastic noise in the original SAR domain to additive and homoskedastic values, but it also presents a consistent sense of distance.
+With the Guass-Markov theorem becoming applicable in this domain, we describe and propose the use of MSE in the log-transformed domain as a unifying criteria to quantitatively measure different requirements for speckle filters.
+
+Our contribution is mainly centered around two points. Firstly, we develop an equation to links the ENL index to the variance in the log-transformed domain, and illustrate it's efficacy for test images.
+Secondly we show that MSE is inversely correlated to the AUC index for heterogenous areas, suggesting that the smaller MSE a filter can achieve, the better would be its ability to discriminate features.
+In short, propose the use of log-domain MSE to evaluate speckle filter performance in a variety of evaluation scenarios, and suggest several test images that may be useful in this regard.
+%Thus we suggest to use MSE in log-transformed domain as a single criteria to evaluate SAR speckle filters.
+%We hope to provide the ultimate questions of how to evaluate and thus how to design excellent speckle filter stand with a clear and objective answer: MSE in log-transformed domain.
+
+It should also be noted (cite POLSAR paper) that a similar consistent sense of distance also exists in POLSAR data. 
+Thus future work may explore the applicability of MSE approaches to POLSAR data analysis and processing.
+
+%IVM commented We also excited with the prospect of applying a wide variety of MSE-based or discriminator based algorithms into SAR and POLSAR values in log-transformed domain.
+%We hope this would allow a wide range of developed algorithms, especially those in the fields of image processing, signal processing, machine learning or information processing, to be applicable in solving both SAR and POLSAR remote sensing problems.
+
+%\section{Introduction}
+%\appendices
+%\section{Discussion and Conclusion}
+
+%\subsection{Conclusion}
+
+%The nature of SAR speckle is stochastics. The speckle filtering problem has been casted into statistical estimation theory framework. Speckle filtering, by and large, means the removal of stochastic component in SAR images. Various negative effects of heteroskedastic statiscal property of original SAR values are discussed. Log-transformation is shown to provide homoskedasticity in SAR modelling. Homoskedastic feature is shown here to help speckle-filtering, it might be possible that this features might also be found helpful in neural networks and other computational intelligence approaches.
+
+%As certain filters are good for certain frequency range, certain estimators are good in certain situations. Combination of estimators, aka. filter banks, may become achievable should their efficiency be estimated, and a situation-dependent measure indicating a prefered estimator is established and employed. Variance in log-transformed domain is shown to be such a measure.
+
+%The speckle filtering technique proposed in this paper has been shown to work for single-look SAR images. Multi-look processed image speckle filtering should be possible to use this technique with some minor adaptations. The filter is developed from an easy to understand winner take all clustering approach to a more fuzzy possibilistic clustering algorithm. Should the fuzzyness taken to a new level, an optimal filter which requires no clustering may be specified and designed.
+
+% references section
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,article}
+
+\end{document}
