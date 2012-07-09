@@ -441,14 +441,14 @@ In fact, this modelling has been used successful in explaining speckle phenomena
 	\subfloat[amplitude]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
-		 \epsffile{src/amplitude_hist_model_pdf_scene1.eps} 	
+		 \epsffile{src/amplitude_histogram.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
 	\subfloat[intensity]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
-		 \epsffile{src/intensity_hist_model_pdf_scene1.eps} 	
+		 \epsffile{src/intensity_histogram.eps} 	
 		 \label{intensity}
 	} \\
 	\subfloat[log amplitude]{
@@ -565,12 +565,13 @@ In this section, the methodology to evaluate speckle filters on homogeneous area
 Under the condition of homogeneity, speckle filters are supposed to estimate with negligible bias.
 Then the filters are traditionally compared by measuring its speckle suppression power using the ENL index.
 Consequently in the log-transformed domain, the first component of MSE evaluation (i.e. bias evaluation) is probably insignificant in comparison to the other component, namely, variance evaluation. 
-The following subsection gives theoretical justification for our methodology where variance evaluation is shown to be mathematically related to the ENL index.
+Subsection \ref{sec:homogeneous_theoretical} gives theoretical justification for our methodology where variance evaluation is shown to be mathematically related to the ENL index.
 The last subsection details how variance evaluation in log-transformed domain can be employed to evaluate the levels of speckle in homogeneous area.
+But before we begin, a brief schematic overview description of our evaluational methodology is presented.
 
 \subsection{ Speckle Filtering Process: General Schema and Evaluation Metrics }
 
-Before we begin, Fig. \ref{fig:simul_process_filter_schema} illustrates the general schema of the various experiments presented in this paper.
+Fig. \ref{fig:simul_process_filter_schema} illustrates the general schema of the various experiments presented in this paper.
 The ``SAR Processor'' block indicates either 
 	the normal process of SAR processing where the unknown ground radiometric attribute ($X$) is captured in $\tilde{X}$ or
 	the simulation process where the noisy SAR data $\tilde{X}$ is simulated from a known ground-truth pattern $X$.
@@ -620,6 +621,7 @@ MSE_{benchmark} = \left| MSE_{noise} - MSE_{base} \right|
 %\end{eqnarray}
 
 \subsection{ Estimating ENL from MSE index in homogeneous areas }
+\label{sec:homogeneous_theoretical}
 
 In this subsection, we show that the variance in log-transformed domain is equationally related to the universal ENL index. 
 Over homogeneous area, the ground-truth is unchanged, i.e. $X^L_i=X^L \forall i$.
@@ -645,7 +647,7 @@ In fact, we could estimate:
 \end{equation}
 Thus, the Equivalent Number of Look, i.e. L, can be estimated as:
 \begin{equation}
-L = \frac{1}{var(\hat{X}^L) \ln^2(2)} + 0.5
+\hat{L}_{est} = \frac{1}{var(\hat{X}^L) \ln^2(2)} + 0.5
 \label{eqn:enl_analytic}
 \end{equation}
 
@@ -664,8 +666,8 @@ It also shows that:
 
 \begin{table}
 \centering
-\begin{tabular}{r|c|c|c|r}
-ENL & Var (Theory) & Var (Analysis) & Var (Observed) & ENL (Estimated) \\
+\begin{tabular}{r|c|c|c|c}
+ENL & Var (Theory) & Var (Analysis) & Var (Observed) & $\hat{L}_{est} $ \\
 \hline
 2  & 1.3423 & 1.3876 & 1.3452 (0.0031) & 2.047 (0.0036)\\
 3  & 0.8221 & 0.8326 & 0.8191 (4.2e-5) & 3.041 (0.0001)\\
@@ -985,7 +987,7 @@ We note that the MSE in inversely correlated to this separability index, suggest
 \begin{table}
 \centering
 \begin{tabular}{c|r|c|c|r}
-Pattern  & Filter  & AUC & MSE (true)   & MSE (noise)      \\% &85\%             &90\%\\
+Pattern  & Filter  & AUC & $MSE_{true}$   & $MSE_{noise}$      \\% &85\%             &90\%\\
 \hline
  point  &  unfiltered  &  0.741 (0.7e-3)  &  4.101 (1.3e-3)  &  2e-33 (4e-36) \\
  point  &  pde  &  0.789 (1.3e-3)  &  1.291 (5.1e-3)  &  1.817 (2.2e-3)\\
@@ -1056,8 +1058,8 @@ Pattern  & Filter  & AUC & MSE (true)   & MSE (noise)      \\% &85\%            
 
 \begin{table}
 \centering
-\begin{tabular}{c|r|c|c|r}
-Pattern  & AUC - true MSE (p-value) & AUC - benchmark MSE (p-value) \\
+\begin{tabular}{c|c|c}
+Pattern  & AUC - $MSE_{true}$ (p-value) & AUC - $MSE_{benchmark}$ (p-value) \\
 \hline
 edge & -0.8958 (1.5e-05) &   -0.9778  (1.6e-09) \\
 point &     -0.9012   (1.1e-05)   &    -0.9816        (5.3e-10) \\
@@ -1096,14 +1098,14 @@ Fig. \ref{fig:real_simulated_images} illustrates some of the images used for our
 	\subfloat[A Rural Area in Vietnam]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
-		 \epsffile{src/P1090360.eps} 	
+		 \epsffile{src/simulated_images.vietnam_rural.gt.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
 	\subfloat[A Suburb of Ha Noi]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
-		 \epsffile{src/P1090253.eps} 	
+		 \epsffile{src/simulated_images.hanoi_suburb.gt.jpg.eps} 	
 		 \label{intensity}
 	} %\\
 %	\subfloat[NTU Campus]{
@@ -1135,7 +1137,7 @@ The same conclusion can be found in our experiments with more images, which cann
 \begin{table}
 \centering
 \begin{tabular}{r|r|c|c}
-Pattern  & Filter  & MSE (true)   & MSE (noise)      \\% &85\%             &90\%\\
+Pattern  & Filter  & $MSE_{true}$   & $MSE_{noise}$      \\% &85\%             &90\%\\
 %\hline
 %chu thap island	& none		& 4.1066	& 1.2e-33\\
 %chu thap island	& pde			& 1.7966	& 1.0866\\
@@ -1177,41 +1179,41 @@ hanoi suburb	& boxcar	& 0.3395	& 4.2882\\
 \begin{center}
 \begin{tabular}{c}
 	\subfloat[Simulated GrayScale Image (ground-truth)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.gt.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
-	\subfloat[Unfiltered Noisy Image (true MSE = 4.1174)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+	\subfloat[Unfiltered Image $MSE_{true}=MSE_{base}=4.1174$]{
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.none.fi.jpg.eps} 	
 		 \label{intensity}
 	} \\
-	\subfloat[PDE Result (true MSE = 3.8022, residual MSE = 0.0073)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+	\subfloat[PDE Result: $MSE_{true}=3.8022,MSE_{noise}=0.0073$]{
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.pde.fi.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
-	\subfloat[Lee Result (true MSE = 0.4984, residual MSE = 3.25553)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+	\subfloat[Lee Result: $MSE_{true}=0.4984,MSE_{noise}=3.25553$]{
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.lee.fi.jpg.eps} 	
 		 \label{intensity}
 	} \\
-	\subfloat[Frost Result (true MSE = 0.3490, residual MSE = 4.6856)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+	\subfloat[Frost Result: $MSE_{true}=0.3490, MSE_{noise} = 4.6856$]{
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.frost.fi.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
-	\subfloat[Boxcar Result (true MSE = 0.3107, residual MSE = 4.2328)]{
-		 \epsfxsize=1.5in
-		 \epsfysize=1.5in
+	\subfloat[Boxcar Result: $MSE_{true} = 0.3107, MSE_{noise}= 4.2328$]{
+		 \epsfxsize=1.6in
+		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.boxcar.fi.jpg.eps} 	
 		 \label{intensity}
 	}
@@ -1289,17 +1291,17 @@ Fig. \ref{fig:real_image_results} qualitatively confirmed our evaluation.
 
 \begin{table}
 \centering
-\begin{tabular}{c|r}
-filter & MSE (noise)\\
+\begin{tabular}{c|r|r}
+filter & $MSE_{noise}$ & $MSE_{benchmark}$\\
 \hline
-pde & 0.2583\\
-map & 2.6936\\
-kuan & 3.3924\\
-lee & 3.4172\\
-boxcar & 3.6918\\
-frost & 4.1191\\
+pde & 0.2583 & 3.8584 \\
+map & 2.6936 & 1.4231 \\
+kuan & 3.3924 & 0.7243 \\
+lee & 3.4172 & 0.6995 \\
+boxcar & 3.6918 & 0.4249 \\
+frost & 4.1191 & 0.0024 \\
 \hline
-SLC unfiltered MSE & 4.1167  
+SLC unfiltered MSE & 4.1167 & 4.1167 
 \end{tabular}
 \caption{Our Conjecture: Most Suitable Speckle Filter For The Scene Can Be Chosen Using The Residual MSE.}
 \label{tab:mse_in_real_image}
@@ -1310,27 +1312,27 @@ SLC unfiltered MSE & 4.1167
 \normalsize
 \begin{center}
 \begin{tabular}{c}
-	\subfloat[PDE Filter: MSE (noise) = 0.2583]{
+	\subfloat[PDE Filter: $MSE_{benchmark}=3.8584$]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
 		 \epsffile{src/heterogenous_real.log.image.pde.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
-	\subfloat[MAP Filter: MSE (noise) = 2.6936]{
+	\subfloat[MAP Filter: $MSE_{benchmark}=1.4231$]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
 		 \epsffile{src/heterogenous_real.log.image.map.jpg.eps} 	
 		 \label{intensity}
 	} \\
-	\subfloat[Lee Filter: MSE (noise) = 3.4172]{
+	\subfloat[Lee Filter: $MSE_{benchmark}=0.6995$]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
 		 \epsffile{src/heterogenous_real.log.image.lee.jpg.eps} 	
 		 \label{amplitude}
 	} 
 	\hfill	
-	\subfloat[Frost Filter: MSE (noise) = 4.1191]{
+	\subfloat[Frost Filter: $MSE_{benchmark}=0.0024$]{
 		 \epsfxsize=1.5in
 		 \epsfysize=1.5in
 		 \epsffile{src/heterogenous_real.log.image.frost.jpg.eps} 	
@@ -1338,7 +1340,7 @@ SLC unfiltered MSE & 4.1167
 	}
 \end{tabular}
 
-\caption{Filtering Real Images: Visual Validation}
+\caption{Filtering Real Images: Smaller $MSE_{benchmark}$ suggests visually better images}
 \label{fig:real_image_results}
 \end{center}
 \end{figure}
