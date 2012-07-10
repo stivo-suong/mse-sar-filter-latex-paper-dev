@@ -44,8 +44,8 @@ Logarithmic transformation has the potential to convert
 	a simpler additive and homoskedastic distribution model.
 From this homoskedastic model, within the log-transformed domain, 
 	a few consistent measures of distance emerge.
-With these subtractive differences become consistent and predictable, 
-	we show, through experiments and analysis, that 
+With these, subtractive differences become consistent and predictable. 
+We show, through experiments and analysis, that 
 	the familiar mean squared error (MSE) criteria can reliably serve 
 		as a single unifying performance indicator to evaluate SAR speckle filters. 
 In homogeneous areas, we determine a mathematical relationship that links the variance of log-transformed SAR data with the canonical Equivalent-Number-of-Looks index.
@@ -60,48 +60,47 @@ Combined, we propose and describe the use of log-transformed MSE to evaluate SAR
 Synthetic aperture radar, speckle-filtering, homoskedasticity, mean-squared-error
 \end{IEEEkeywords}
 
-%\textbf{Keywords: } Synthetic Aperture Radar, speckle-filtering, homoskedasticity
-
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
 
-The nature of SAR speckle is that:
+The nature of SAR speckle is that
 	it is stochastic even when the underlying radiometry is constant, 
 	and when there are spatial variation of this radiometry, not only its expected value changes, but so does its heteroskedastic variance.
-Nevertheless, statistical models are developed to derive the underlying back-scattering coefficient ($\sigma$) from the measured SAR data. 
-Then speckle filters are, by and large, estimators that attempt to determine the unknown coefficient from observable SAR data. 
+Nevertheless, statistical models have been developed to derive the underlying back-scattering coefficient ($\sigma$) from measured SAR data. 
+Then speckle filters are, by and large, estimators that attempt to determine this unknown coefficient from observable SAR data. 
 
 SAR speckle-filtering can be, and has been, positioned within the context of estimation theory\cite{Touzi_2002_TGRS}. 
-The stages in this statistical framework consist of statistical modelling, estimator development and evaluating of the performance of estimators. 
+The stages in this statistical framework consist of statistical modelling, estimator development and evaluating the estimators' performance. 
 The estimators are typically evaluated based on the bias and variance properties of their estimates; 
-	with lower bias and / or lower variance, hence lower MSE, indicates better performances. 
-Ideally, estimators' evaluation should be based both qualitatively on some real data and quantitatively through simulated experiments. 
-Also, due to the stochastic nature of SAR and simulation process, 
-	statistical summaries of repeated simulating experiments are normally preferred to single-run results.
+	with lower bias and / or lower variance, hence lower MSE, indicating more accurate performance.
+Ideally, estimator evaluation should be based both qualitatively on some real data and quantitatively through simulated experiments. 
+Also, due to the stochastic nature of SAR processing as well as simulating process, 
+	statistical summaries of repeatedly simulated experiments are normally preferred to single-run results.
 
-A survey of SAR speckle filter research, however, indicates 
+Our survey of SAR speckle filter research, however, indicates 
 	a different picture from the standard practice of the statistical framework, 
 	specifically, in the stage of performance evaluation. 
 Due to the multiplicative and heteroskedastic nature of speckle noise, 
 	bias and variance evaluation may not be the most useful measures. 
-Thus, the standard evaluation metric of mean-squared-error is found to be inapplicable.
-%This makes the standard mean-squared-error evaluation to be inapplicable, at least in the original domain. 
+Thus, the standard evaluation metric of mean-squared-error is not applicable,
+	as alternative evaluation criteria are proposed.
 In fact, a survey of relevant literature fails to reveal 
-	a single universally agreed quantitative metric to evaluate speckle filters.
+	a single universally agreed quantitative metric for the evaluation of speckle filters.
 
-The common theme is that each newly proposed speckle filter is often found to be published along with a customised methodology of evaluating its own performance.
-And many papers lack any comparative basis beyond simple visual qualititave comparisions on a few image scenes. 
+The common theme is that each newly proposed speckle filter tends to be published along with a customised methodology for evaluating its own performance.
+Many papers lack a comparative basis beyond simple visual qualititave comparision on a few image scenes. 
 While such visual comparison is useful, as an evaluative methodology, regretably it lacks scientific objectivity. 
 Other papers do present quantitative measurements, 
 	however  due to the lack of a standardized performance criteria, 
-	the evaluation metrics change eccentrically from one paper to the next.
+	the evaluation metrics can change eccentrically from one paper to the next.
 
+In this paper, we propose the use of MSE in the homoskedastic log-transformed domain to evaluate speckle filters. 
 The rest of this paper is structured as follows.
 While Section \ref{sec:lit_review} briefly surveys related work in published literature, Section \ref{sec:log_transform} provides a quick discussion of the Logarithmic Transformation.
 Section \ref{sec:eval_homo} then illustrates the use of variance (an MSE component) in the log-transformed domain to evaluate different filters' speckle suppression power over homogeneous areas.
-Section \ref{sec:eval_hetero} describes the use of the same MSE to evaluate the performance of speckle filters in heterogeneous area.
-Section \ref{sec:practical_conjecture} hypothesizes the use of residual MSE in the log-transformed domain 
+Section \ref{sec:eval_hetero} describes the use of the same MSE to evaluate the performance of speckle filters in heterogeneous areas.
+Section \ref{sec:practical_conjecture} hypothesises the use of residual MSE in the log-transformed domain 
 	to choose the most suitable speckle filter for a given satellite-captured SAR image.
 %And the last section provides our discussion together with our concluding remarks.
 Finally, section \ref{sec:discussion} discusses the findings and presents concluding remarks.
@@ -110,76 +109,80 @@ Finally, section \ref{sec:discussion} discusses the findings and presents conclu
 \label{sec:lit_review}
 
 %Addressing this issue, 
-There has been a few published articles dedicated to the topic of evaluating speckle filters.
-However, our survey of SAR speckle filtering research indicates 
-	the lack of a single universally-agreed quantitative metric to evaluate speckle filters.
-In the rest of this introductory section, we briefly review published work 
+%There have been a few published articles dedicated to the topic of evaluating speckle filters.
+%However, our survey of SAR speckle filtering research indicates 
+%	the lack of a single universally-agreed quantitative metric to evaluate speckle filters.
+In this section, we briefly review published work 
 	related to the topic of evaluating SAR speckle filters.	
-
 It is customary to divide the evaluation of speckle filters into two scenarios:
-	homogeneous area and heterogeneous scenes.
-In homogeneous area,
+	homogeneous areas and heterogeneous scenes.
+In homogeneous areas,
 	speckle filters are expected to estimate with negligible radiometric bias.
-Thus evaluating speckle filters on homogeneous area have traditionally been focused on evaluating the variation of the estimators' output.
-In contrast, the methodologies to evaluate speckle filters in heterogeneous area are much more complex, probably due to the following difficulties.
+Thus evaluating speckle filters on homogeneous areas has traditionally been focused on evaluating the variation of the estimators' output (i.e. the speckle suppression power).
+By contrast, the methodologies to evaluate speckle filters in heterogeneous areas are much more complex, probably due to the following difficulties.
 The first difficulty is to find out an absolute ground-truth against which quantitative criteria can be measured.
 The second challenge is to come up with a quantifiable metric allowing the performance of different speckle filters to be measured and compared.
-In this subsection, various published work in evaluating SAR speckle filters are critically reviewed.
+%In this subsection, various published work in evaluating SAR speckle filters are critically reviewed.
 
-The general requirement for speckle filters is that its application should allow easier detection and classification of the imaging features.
-As shown in the subsequent section, 
-	one can choose to work in original domain of SAR data where the speckle is multiplicative and heteroskedastic, or
-	logarithmic transformation can be utilized to convert SAR data into a simpler additive and homoskedastic model.
-In this log-transformed domain, the requirement of speckle filtering can be broken down into two smaller requirements.
-On the one hand, the filters should preserve the underlying radiometric signal (i.e. radiometric preservation), while on the other hand, they should reduce the variation of the additive noise (i.e. speckle suppression).
-These smaller requirements can be intepreted and evaluated by evaluating, also in log-transformed domain, the output's bias and variance error.
-The Mean-Squared-Error evaluation is a combined evaluation of bias and variance error evaluations, and hence is capable of evaluating the general requirement of speckle filtering.
+We believe that the metric to evaluate speckle filter should be relevant to the normal usage of such filters.
+The general requirement for a speckle filter in SAR processing framework is that its application should allow easier measurement, detection and classification of the underlying radiometric features.
+%As shown in the subsequent section, 
+%	one can choose to work in the original domain of SAR data where the speckle is multiplicative and heteroskedastic, or
+%	logarithmic transformation can be utilized to convert SAR data into a simpler additive and homoskedastic model.
+As shown in the subsequent sections, in the log-transformed domain, 
+	this overall requirement of speckle filtering can be broken down into two smaller requirements.
+On the one hand, speckle filters should preserve the underlying radiometric signal (namely the radiometric preservation requirement), while on the other hand, they should reduce the variation of the additive noise (i.e. speckle suppression power).
+These requirements can be measured and evaluated by determining, in the log-transformed domain, the bias and variance error of the output.
+The Mean-Squared-Error evaluation is a combined evaluation of bias and variance error evaluations, and hence is capable of evaluating the general requirements of speckle filtering.
 %Combined the overall general requirement of speckle filters can be evaluated using the traditional Mean-Squared-Error.
 
 For homogeneous scenes, 
-	where the underlying radiometry is assumed to be unchanged, 
-	the filtered results can be statistically considered as samples of 
+	where the underlying radiometry is assumed to be constant, 
+	the filtered results, statistically speaking, can be considered as samples of 
 		a single but complex stochastic process.
 %Statistical analysis have shown that the SAR speckle is not only multiplicative but also heterokedastic.
-From the logarithmic transformation perspective, the radiometric preservation and speckle suppression requirements of speckle filters can then be judged using the familiar bias and variance evaluation.
+Then, from the logarithmic transformation perspective, the radiometric preservation and speckle suppression requirements of speckle filters can be judged using the familiar bias and variance evaluation.
 	%are expected to estimate with no radiometry bias. 
 %The best filters achieve maximum speckle suppression power in such areas.
 
-A metric that can be used to detect radiomtric distortion is the ratio between the noisy pixel to the estimated value $r = X_{org}/X_{est}$ \cite{Oliver_2004_SciTech} \cite{Medeiros_2003_IJRS}.
-In the log-transformed domain, the equivalent index would, of course, be a simple substraction.
-In \cite{Shi_IGARSS_1994}, Shi et al found that 
+A metric that can be used to detect radiomtric distortion is the ratio between the estimated number and the original value $r = X_{est} / X_{org}$ \cite{Oliver_2004_SciTech} \cite{Medeiros_2003_IJRS}.
+A somewhat similar metric is used in \cite{Wang_2005_MIPR} as $r_w = (X_{est} - X_{org} )/ X_{org}$.
+In the log-transformed domain, the equivalent index for $r$ would, of course, be a simple substraction.
+In other words, it is evident that the bias evaluation in the log-transformed domain can be used to evaluate the radiometric preservation requirement of speckle filters. 
+
+Specifically for homogeneous scenes, Shi et al. \cite{Shi_IGARSS_1994} found that 
 	in the original domain the ``standard'' filters (boxcar, Lee\cite{Lee_PAMI_1980}, Kuan \cite{Kuan_1985_PAMI}, Frost\cite{Frost_PAMI_1982}, MAP\cite{Lopes_IGARSS_1990}) and their enhanced versions \cite{Lopes_TGRS_1990} can achieve negligible bias. 
-In this paper, we also observe that all of these standard filters not only can preserves the expected radiometric values, but in the log-transformed domain they also can preserve a few substractive and consistent measures of distance.
+In this paper, we will also show that all of these standard filters 
+	not only can preserves the expected radiometric values, 
+	but in the log-transformed domain they also can preserve a few substractive and consistent measures of distance.
 
 A few metrics have been used to evaluate speckle suppression power.
 The most common measure is the Equivalent Number of Looks index 
 $ENL=avg(I)^2/var(I)$
 that was proposed by Lee \cite{Lee_1981_CGIP}.
 Another very similar metric is the ratio of mean to standard deviation, $R=avg(I)/std(I)$ \cite{Gagnon_SPIEProc_1997} 
-In section 3, it will be shown that, for homogeneous areas, ENL is related to variance in log-transformed domain.
-The link is also consistent with other independent results concerning measures of homogeneity where, Solbo \cite{Solbo_2006_TGRS} used standard deviation in the log-transformed domain to measure homogeneity, 
-	while Lopes \cite{Lopes_TGRS_1990} proposed the use of variation co-efficient index $C_v = std(I)/avg(I)$ to evaluate scene heterogeneity.
+In Section \ref{sec:eval_homo}, it will be shown that, for homogeneous areas, ENL is related to variance in the log-transformed domain.
 %However, since Lopes' underlying assumption of the scene variation may not be applicable in a designed test pattern, we do not consider the index further in these experiments.
-In this paper we propose the use of variance to evaluate the noise suppression power of speckle filters.
-Combined, in homogeneous area, we show that variance evaluation in log-transformed domain, 
-	which is a component of MSE evaluation, 
-	can be and practically has been used to evaluate speckle filters.
-%Combined, we show that Mean Squared Error in log-transformed domain can be used to evaluate speckle filters in homogeneous area.
+Subsequently, we propose the use of log-variance to evaluate the noise suppression power of speckle filters which is the primary criteria to evaluate speckle filters over homogeneous area.
+%Combined, in homogeneous area, we show that variance evaluation in log-transformed domain, 
+%	which is a component of MSE evaluation, 
+%	can be and practically has been used to evaluate speckle filters.
+%Combined, we show that Mean Squared Error in log-transformed domain can be used to evaluate speckle filters not only in homogeneous areas but also in heterogeneous scenes.
 
-Real-life and practical images, however, are not homogeneous, 
-	and there are a few associated difficulties in evaluating speckle filters in heterogenous scenes.
+Real-life and practical images, however, are not homogeneous.
+Thus there are a few associated difficulties in evaluating speckle filters in heterogenous scenes.
 %and there are many proposed methods of evaluating speckle filters in such areas. 
 %It is here that the situation becomes less structured, and more `exciting' from a research perspective.
 %and it is here that things gets a lot more exciting and unstructured to evaluate speckle filters in heterogenous area.
-The first difficulty in evaluating speckle filters for heterogeneous scene is to find the bases for comparision. 
+The first difficulty in evaluating speckle filters for heterogeneous scenes is to select the basis for comparision. 
 It is trivially easy to estimate the underlying radiometric co-efficient if an area is known to be homogeneous
 However, without simulation or access to lab environment ground-truth, it is practically impossible to do so for real-life images (thus the need for speckle filters' estimation).
 
 Without ground truth, one way to evaluate radiometric preservation of filters is to compute the ratio image, mentioned above. 
-Under a multiplicative model, the ratio images is expected to comprise the noise being removed, (i.e. it should be completely random). 
+Under a multiplicative model, the ratio image is expected to comprise the noise being removed, (i.e. it should be completely random). 
 Being random, this should display as little ``visible'' structure as possible. 
 %Also its histogram and PDF are expected to match the noise characteristics in the original image as closely as possible.
-However, when displaying such images for visual evaluations, ratios that are smaller than unity are much harder to distinguish than those that are bigger \cite{Medeiros_2003_IJRS}, meaning that a purely visual analysis may be insufficient.
+However, when displaying such images for visual evaluation, ratios that are smaller than unity are much harder to distinguish than those that are bigger \cite{Medeiros_2003_IJRS}, meaning that a purely visual analysis may be insufficient.
 We therefore propose to adopt a log-transformed domain approach where multiplicative noise then resembles the familiar additive model.
 The ratio image then becomes a simple substraction image.
 The evaluation methodology for such a proposal does not differ, but now the residual image is additive and linear and thus more natural to display and evaluate visually (see section \ref{sec:practical_conjecture}).
@@ -187,15 +190,15 @@ The evaluation methodology for such a proposal does not differ, but now the resi
 Another way to evaluate speckle filters is by assessing the feature preservation characteristics of the original noised data and those of the filtered image. 
 When there is no ground-truth given, the feature are estimated in both the original noised and the filtered images.
 Evaluation would then determine how closely related the two feature maps are. 
-Various methods may be applied extract features; some that have been used are the Hough Transform \cite{Medeiros_2003_IJRS}, Robert gradient edge detector \cite{Gagnon_SPIEProc_1997} or edge map \cite{Frost_PAMI_1982}.
-While significant effort has been spent on these evaluations, we have serious doubts about the precision of this methodology.
+Various methods may be applied to extract features; some that have been used are the Hough Transform \cite{Medeiros_2003_IJRS}, Robert gradient edge detector \cite{Gagnon_SPIEProc_1997} or edge map \cite{Frost_PAMI_1982}.
+While significant effort has been spent on these evaluations, serious doubts remain concerning the precision of this methodology.
 This is because feature extraction algorithms are only approximations 
 	whose accuracy is 
 		not only dependent upon the characteristics of the original image 
 		but also heavily reliant on the inherent noise.
-Unfortunately, speckle filters invariably alter the noise's characteristics.
+Unfortunately, speckle filters invariably alter the noise characteristics.
 Thus without a clear understanding of these dependencies and no absolute ground truth, 
-	using feature extraction algorithms to evaluate speckle filters would leave serious questions on how to interprete the accuracy of its results.
+	using feature extraction algorithms to evaluate speckle filters would leave serious questions on how to interpret the results and especially its accuracy.
 %is just too imprecise for us.
 
 Since SAR statistical models are quite well understood, 
@@ -203,13 +206,13 @@ Since SAR statistical models are quite well understood,
 		to evaluate speckle filters.
 		%without the need to apply feature detection. 
 In this paper, we also make use of a similar methodology discussed above with two important changes.
-Firstly, our simulated experiments offer absolute ground-truth, serving as the base of comparisons.
-Secondly, our threshold based feature extraction algorithm is extremely simple.
-More importantly, the dependency between the algorithm's performance and the noise level is well established. 
-This performance 
-	can conveniently be visualised by plotting the Receiver Operating Characteristics Curve (ROC) 
-	as well as objectively be quantified by measuring the Area Under this Curve (AUC). 
-As shown in section \ref{sec:eval_hetero}, this standard and normalized criteria then allow for the comparative evaluation of feature preservation capabilities of different speckle filters.
+Firstly, our simulated experiments offer absolute ground-truth.
+Secondly, our threshold-based feature extraction algorithm is extremely simple.
+More importantly, the dependency between the performance of the algorithm and the level of noise is well established. 
+This performance can be 
+	conveniently visualised by plotting the Receiver Operating Characteristics Curve (ROC) 
+	as well as objectively quantified by measuring the Area Under this Curve (AUC). 
+As shown in section \ref{sec:eval_hetero}, this standard and normalized criteria allows a comparative evaluation of feature preservation capabilities for different speckle filters.
 
 %There are two main ways that ground truths are used in evaluating speckle filters.
 %A simple method is to embed speckle noise into an existing optical image, and then use the filters to estimate noise-free imagary from this. 
@@ -229,21 +232,35 @@ In fact the common consensus is that a powerful speckle suppresion filter (for e
 %One can relatively easily satisfy one of these criteria, but not easily satisfy both.
 %Thus, the second difficulty in evaluating speckle filters for heterogeneous scene is to find a single valid metrics to measure the performance of speckle filters. 
 
-(TO REWRITE) Overall, we see many different methods and metrics used for evaluating speckle filters. However it is clearly advantageous to have a single metric that is able to judge if one filter is better than another. Wang \cite{Wang_2005_MIPR} has attempted to look at the problem: he proposed using fuzzy membership to weight opinions of an expert panel. Although this provides a potential solution, we consider it to be tedious in implementation, fuzzy in concept and is still subjective in nature.
+Overall, many different methods and metrics have been proposed to evaluate varios aspects of speckle filters. 
+However it is clearly advantageous to have a single metric that is able to judge if one filter is better than another. 
+Wang \cite{Wang_2005_MIPR} has attempted to look at the problem: he proposed using fuzzy membership to weight opinions of an expert panel. 
+Although this provides a potential solution, we consider it to be tedious in implementation, fuzzy in concept and is still subjective in nature.
 
-Similar to the ENL index in homogeneous area, in establishing an evaluation metric, 
-	it is desirable that the criteria should also be scene-independent\cite{Shi_IGARSS_1994}.
-The most common measure of difference in image processing methods is to compute some substractive distances, either in intensity or in amplitude domain. 
-However since SAR noise is multiplicative in the original domain, these differences are not only dependent on the noise level but also on the amplitude level of the signal itself.
+%Similar to the ENL index in homogeneous area, in establishing an evaluation metric, 
+%	it is desirable that the criteria should also be scene-independent\cite{Shi_IGARSS_1994}.
+%The most common measure of difference in image processing methods is to compute some substractive distances, either in intensity or in amplitude domain. 
+%However since SAR noise is multiplicative in the original domain, these differences are not only dependent on the noise level but also on the amplitude level of the signal itself.
 %Shi \cite{Shi_IGARSS_1994} define sharpness as the ratio between
 %Shi define the mid-point position of an edge as the intensity value between the nominal values of the two regions, $M= { E(X_t) + E(X_b)}/{2}$
 %	and the sharpness of an edge as the slope between the two nominal intensities value, $S=E(X_t)-E(X_b)$, 
 %	where $E()$ denotes expectation operator. 
 
-Another attempt is to apply a universal mean squared error criteria into the context of SAR data. However since SAR data is heteroskedastic, the use of MSE is not straightforward. 
+Another approach is to apply a universal mean squared error criteria into the context of SAR data. 
+However since SAR data is heteroskedastic, which violaes the Gauss Markov theorem, the use of MSE is not straightforward. 
 Thus Gagnon \cite{Gagnon_SPIEProc_1997} suggested the use of the signal over mean square noise removed metric, which is argued to be similar to the standard signal to noise ratio (SNR) in intrepretation. Others have suggest the use of normalized MSE, which is essentially the ratio between MSE and the expected mean.
 
-In this paper, we propose the use of MSE in the homoskedastic log-transformed domain. This is similar to the investigation of residual image in log-transformed domain and also agrees with the log-transformed variance metric in homogeneous area (assuming that the filters have no problem preserving the mean). We also show experimentally that this MSE measure is inversely correlated with the AUC index mentioned earlier, suggesting that the lower the MSE index a filter can achieve, the better its feature preservation capability can be.
+%Thus we propose the use of MSE in the homoskedastic log-transformed domain to evaluate eps. 
+%This is similar to the investigation of residual image in log-transformed domain and also agrees with the log-transformed variance metric in homogeneous area (assuming that the filters have no problem preserving the mean). We also show experimentally that this MSE measure is inversely correlated with the AUC index mentioned earlier, suggesting that the lower the MSE index a filter can achieve, the better its feature preservation capability can be.
+
+In this paper, homoskedastic property is shown to be available after logarithmic transformation of SAR data.
+As the important Gauss Markov theorem becomes applicable again, 
+	the use of MSE is shown to be relevant again in evaluating statistical estimators (i.e. speckle filters).
+Initial intitution suggests that each components of the MSE measure, 
+	namely bias and variance evaluation, can be mapped into 
+	the requirements of radiometric preservation and speckle suppression for speckle filters.
+Before the details of our evaluation methodology is presented, 
+	Section \ref{sec:log_transform} provides a brief discussion on logarithmic transformation for SAR images.
 
 \section{Logarithmic Transformation}
 \label{sec:log_transform}
@@ -697,6 +714,9 @@ ENL & Var (Theory) & Var (Analysis) & Var (Observed) & $\hat{L}_{est} $ \\
 \caption{ Speckle Suppression Power: ENL and Variance }
 \label{tab:enl_in_log_domain}
 \end{table}
+
+The finding here is also consistent with other independent results where, Solbo \cite{Solbo_2006_TGRS} used standard deviation in the log-transformed domain to measure homogeneity, 
+	while Lopes \cite{Lopes_TGRS_1990} proposed the use of variation co-efficient index $C_v = std(I)/avg(I)$ to evaluate scene heterogeneity.
 
 \subsection{Using log-variance to evaluate speckle filters}
 
