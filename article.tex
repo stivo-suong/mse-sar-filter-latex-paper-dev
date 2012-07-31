@@ -27,7 +27,7 @@
 	%and Timo~Brestchneider % <-this % stops a space
 \thanks{Thanh-Hai~Le, Brian~Quang-Huy~Nguyen, Nicholas~Chan-Hua~Vun, and Ian~McLoughlin are with School of Computer Engineering, 
 Nanyang Technological University, Singapore,}% <-this % stops a space
-%\thanks{Ken-Yoong Lee and Timo Brestchneider are with EADS InnovationWorks Singapore.}% <-this % stops a space
+\thanks{The authors wish to thank Dr. Ken-Yoong Lee and Dr. Timo Brestchneider of EADS InnovationWorks Singapore for initial discussions and for providing RADARSAT2 images used in this paper. }% <-this % stops a space
 \thanks{Manuscript received ?, 2012; revised ?.}}
 
 \markboth{Transactions on Geoscience \& Remote Sensing,~Vol.~?, No.~?, Jul~2012}%
@@ -1136,7 +1136,7 @@ line &      -0.8223     (3.1e-04)  &   -0.9421       (4.8e-07) \\
 \hline
 \end{tabular}
 
-\caption{The correlation between MSE and AUC measure of feature discrimination (inside the brackets are corresponding p-values)}
+\caption{The correlation between MSE and AUC evaluation criteria (inside the brackets are corresponding p-values)}
 \label{tab:mse_auc_corr_coeff}
 \end{table}
 
@@ -1146,14 +1146,14 @@ line &      -0.8223     (3.1e-04)  &   -0.9421       (4.8e-07) \\
 In this section our conjecture of using MSE in log-transformed domain to find the most suitable speckle filter for practical real-captured SAR images is described.
 In these scenarios, the ground-truth and hencem the true MSE is not available.
 Then only the residential MSE is computable.
-Assumming the level of speckle noise (e.g. ENL or $MSE_{base}$) is known or can be estimated, then the benchmark MSE is also measurable.	
+Assumming the level of speckle noise (i.e. ENL or $MSE_{base}$) is known or can be estimated, then the benchmark MSE is also measurable.	
 Our heuristic rule is that the best filtered results are those that have minimal benchmarked MSE. 
 This heuristic rule allow us to choose the ``best'' filtered results from an array of standard speckle filters in any captured SAR images, 
 	where the ground-truth and hence true MSE is not available.
 Intuitively, the hypothesis is that the best speckle filter for a given scene is the one having its removed variation being closest to the inherent speckle noise.
 
 Experimental results are presented as empirical evidence supporting the conjecture.
-The experiments in the previous sections are repeated on SLC SAR images 
+The experiments in the previous sections are repeated on Single-Look SAR images 
 	which are simulated from given ground-truth aerial images. 
 %The a heuristic rule is that 
 %	if the best filtered results are those with minimal MSE 
@@ -1163,7 +1163,7 @@ The experiments in the previous sections are repeated on SLC SAR images
 %Besides using visual evaluation to validate the conjecture, 
 %	the full justification of this conjecture is outside the scope of this paper.
 %Real images however are more complex than the patterns illustrated above. 
-We also apply the filters on simulated SAR images, built by adding Single Look Noise into various aerial images. 
+Then the filters are applied onto the simulated SAR images. 
 Fig. \ref{fig:real_simulated_images} illustrates some of the images used for our experiments.
 
 \begin{figure}
@@ -1204,8 +1204,9 @@ With the use of MSE being validated from previous experiments,
 Table \ref{tab:mse_true_noise_log_domain} shows that among the various filters used, 
 	the most suitable filter are also the filter that 
 		have the its observable residual MSE value being closest to the noise MSE (4.1167 in our case).
-We validate the idea by qualititative evaluation, an example of which is presented in Fig. \ref{fig:real_simulated_image_results}.
-The same conclusion can be found in our experiments with more images, which cannot be shown here due to space limitation.
+%We validate the idea by qualititative evaluation, an example of 
+The conjecture is also validated using visual evaluation, an example of
+	which is presented in Fig. \ref{fig:real_simulated_image_results}.
 
 \begin{table}
 \centering
@@ -1226,14 +1227,14 @@ Pattern  & Filter  & $MSE_{true}$   & $MSE_{noise}$      \\% &85\%             &
 %ntu campus	& boxcar	& 0.5136	& 4.5839\\
 %ntu campus	& kuan		& 0.4910	& 3.9444\\
 \hline
-Vietnam rural	& none		& 4.1174	& 3.9e-35\\
+Vietnam rural	& none		& 4.1174	& 4e-35\\
 Vietnam rural	& pde			& 3.8022	& 0.0368\\
 Vietnam rural	& lee			& 0.4984	& 3.2555\\
 Vietnam rural	& frost		& 0.3490	& 4.6856\\
 Vietnam rural	& kuan		& 0.3396	& 3.6877\\
 Vietnam rural	& boxcar	& 0.3107	& 4.2328\\
 \hline
-Hanoi suburb	& none		& 4.1321	& 4.1e-35\\
+Hanoi suburb	& none		& 4.1321	& 4e-35\\
 Hanoi suburb	& pde			& 3.8004	& 0.0391\\
 Hanoi suburb	& lee			& 0.5261	& 3.2598\\
 Hanoi suburb	& frost		& 0.3811	& 4.7427\\
@@ -1251,7 +1252,7 @@ Hanoi suburb	& boxcar	& 0.3395	& 4.2882\\
 \normalsize
 \begin{center}
 \begin{tabular}{c}
-	\subfloat[Simulated GrayScale Image (ground-truth)]{
+	\subfloat[Ground-Truth Image ]{
 		 \epsfxsize=1.6in
 		 \epsfysize=1.6in
 		 \epsffile{src/simulated_images.vietnam_rural.gt.jpg.eps} 	
@@ -1298,9 +1299,17 @@ Hanoi suburb	& boxcar	& 0.3395	& 4.2882\\
 \end{figure}
 %\end{figure*}
 
+The results from the experiments in previous sections can also be used to validate the use of residual and benchmark MSE.
+The AUC-$MSE_{benchmark}$ column in Table \ref{tab:mse_auc_corr_coeff} shows that the criteria index is strongly correlated with feature classification capability, measured by the standard AUC index.
+
+The filters are also applied onto a real RADARSAT 2 image.
+In this case, since the ground-truth is not available, 
+	only visual evaluation can be used to validate our conjecture.
 Table \ref{tab:mse_in_real_image} tabulate the computed MSE of the ``removed'' additive noise.
 Apparently all filters still left some noise ``unremoved'', in which case, the higher removed noise MSE would probably suggest a more suitable filter.
 Fig. \ref{fig:real_image_results} qualitatively confirmed our evaluation.
+The conclusions in this can be found in further experiments with more images, 
+	which cannot be shown here due to space limitation.
 
 \begin{table}
 \centering
